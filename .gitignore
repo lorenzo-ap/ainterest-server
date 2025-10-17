@@ -3,4 +3,4 @@ node_modules
 *.gz
 .DS_Store
 .env
-dist
+public
