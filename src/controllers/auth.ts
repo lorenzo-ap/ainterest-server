@@ -1,13 +1,22 @@
+import { CookieSerializeOptions } from '@fastify/cookie';
 import bcrypt from 'bcryptjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
 import { AuthenticatedRequest } from '../middleware/auth-middleware';
 import { User } from '../models';
 
-const cookieOptions = {
+const accessTokenCookieOptions: CookieSerializeOptions = {
 	httpOnly: true,
 	secure: true,
-	sameSite: 'none' as const,
+	sameSite: 'none',
+	maxAge: 5 * 60 * 1000, // 5 minutes,
+	path: '/'
+};
+
+const refreshTokenCookieOptions: CookieSerializeOptions = {
+	httpOnly: true,
+	secure: true,
+	sameSite: 'none',
 	maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 	path: '/api/v1/auth/refresh'
 };
@@ -80,15 +89,15 @@ export const registerUser = async (request: FastifyRequest<{ Body: RegisterBody 
 	user.refreshToken = refreshToken;
 	await user.save();
 
-	reply.cookie('refreshToken', refreshToken, cookieOptions);
+	reply.cookie('access-token', accessToken, accessTokenCookieOptions);
+	reply.cookie('refresh-token', refreshToken, refreshTokenCookieOptions);
 
 	return reply.status(201).send({
 		_id: user._id,
 		username: user.username,
 		email: user.email,
 		photo: '',
-		role: user.role,
-		accessToken
+		role: user.role
 	});
 };
 
@@ -118,15 +127,15 @@ export const loginUser = async (request: FastifyRequest<{ Body: LoginBody }>, re
 	user.refreshToken = refreshToken;
 	await user.save();
 
-	reply.cookie('refreshToken', refreshToken, cookieOptions);
+	reply.cookie('access-token', accessToken, accessTokenCookieOptions);
+	reply.cookie('refresh-token', refreshToken, refreshTokenCookieOptions);
 
 	return reply.status(200).send({
 		_id: user._id,
 		username: user.username,
 		email: user.email,
 		photo: user.photo,
-		role: user.role,
-		accessToken
+		role: user.role
 	});
 };
 
@@ -136,7 +145,7 @@ export const loginUser = async (request: FastifyRequest<{ Body: LoginBody }>, re
 	@access Public
 **/
 export const refreshToken = async (request: FastifyRequest, reply: FastifyReply) => {
-	const refreshToken = request.cookies.refreshToken;
+	const refreshToken = request.cookies['refresh-token'];
 
 	if (!refreshToken) {
 		return reply.status(401).send({ message: 'Refresh token required' });
@@ -144,9 +153,7 @@ export const refreshToken = async (request: FastifyRequest, reply: FastifyReply)
 
 	try {
 		// Verify refresh token
-		const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as {
-			id: string;
-		};
+		const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as jwt.JwtPayload;
 
 		// Find user and check if refresh token matches
 		const user = await User.findById(decoded.id);
@@ -157,9 +164,9 @@ export const refreshToken = async (request: FastifyRequest, reply: FastifyReply)
 
 		const newAccessToken = generateAccessToken(user._id.toString());
 
-		return reply.status(200).send({
-			accessToken: newAccessToken
-		});
+		reply.setCookie('access-token', newAccessToken, accessTokenCookieOptions);
+
+		return reply.status(200).send({ message: 'Access token refreshed' });
 	} catch (error) {
 		request.log.error(error);
 		return reply.status(403).send({ message: 'Your session has expired, please sign in again' });
@@ -174,13 +181,11 @@ export const refreshToken = async (request: FastifyRequest, reply: FastifyReply)
 export const logoutUser = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const authenticatedRequest = request as AuthenticatedRequest;
-		// Remove refresh token from database
+
 		await User.findByIdAndUpdate(authenticatedRequest.user._id, { refreshToken: null });
 
-		// Clear refresh token cookie
-		reply.clearCookie('refreshToken', {
-			path: '/api/v1/auth/refresh'
-		});
+		reply.clearCookie('access-token', accessTokenCookieOptions);
+		reply.clearCookie('refresh-token', refreshTokenCookieOptions);
 
 		return reply.status(200).send({ message: 'Logged out successfully' });
 	} catch (error) {

@@ -12,29 +12,20 @@ export interface AuthenticatedRequest extends FastifyRequest {
 
 export const protect = async (request: FastifyRequest, reply: FastifyReply) => {
 	const authenticatedRequest = request as AuthenticatedRequest;
+	const accessToken = request.cookies['access-token'];
 
-	let token: string | undefined;
-
-	if (request.headers.authorization && request.headers.authorization.startsWith('Bearer')) {
-		token = request.headers.authorization.split(' ')[1];
-	}
-
-	if (!token) {
-		return reply.status(401).send({ message: 'Not authorized, no token' });
+	if (!accessToken) {
+		return reply.status(401).send({ message: 'Not authorized, no access-token provided' });
 	}
 
 	try {
-		// Verify access token
-		const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as JWTPayload;
-
-		// Get user from token without password and assign it to the request object
+		const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET!) as JWTPayload;
 		const user = await User.findById(decoded.id).select('-password');
 
 		if (!user) {
 			return reply.status(401).send({ message: 'Not authorized, user not found' });
 		}
 
-		// Attach user to request
 		authenticatedRequest.user = user as Omit<IUser, 'password'>;
 	} catch (error: any) {
 		authenticatedRequest.log.error(error);
