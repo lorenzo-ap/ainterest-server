@@ -2,10 +2,6 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
 import { IUser, User } from '../models';
 
-interface JWTPayload {
-	id: string;
-}
-
 export interface AuthenticatedRequest extends FastifyRequest {
 	user: Omit<IUser, 'password'>;
 }
@@ -19,7 +15,7 @@ export const protect = async (request: FastifyRequest, reply: FastifyReply) => {
 	}
 
 	try {
-		const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET!) as JWTPayload;
+		const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET!) as jwt.JwtPayload;
 		const user = await User.findById(decoded.id).select('-password');
 
 		if (!user) {

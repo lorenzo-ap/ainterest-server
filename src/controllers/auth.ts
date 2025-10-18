@@ -4,6 +4,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
 import { AuthenticatedRequest } from '../middleware/auth-middleware';
 import { User } from '../models';
+import { LoginBody, RegisterBody } from '../types';
 
 const accessTokenCookieOptions: CookieSerializeOptions = {
 	httpOnly: true,
@@ -20,17 +21,6 @@ const refreshTokenCookieOptions: CookieSerializeOptions = {
 	maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 	path: '/api/v1/auth/refresh'
 };
-
-interface RegisterBody {
-	username: string;
-	email: string;
-	password: string;
-}
-
-interface LoginBody {
-	email: string;
-	password: string;
-}
 
 const generateAccessToken = (id: string) => {
 	return jwt.sign({ id }, process.env.JWT_ACCESS_SECRET!, {

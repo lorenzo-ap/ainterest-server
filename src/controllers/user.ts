@@ -2,6 +2,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthenticatedRequest } from '../middleware/auth-middleware';
 import { Post, User } from '../models';
+import { EditUserBody } from '../types';
 
 /**
 	@desc Get user data
@@ -44,12 +45,6 @@ export const getUserByUsername = async (
 		role: user.role
 	});
 };
-
-interface EditUserBody {
-	username?: string;
-	email?: string;
-	photo?: string;
-}
 
 /**
  * @desc Edit user data

@@ -1,12 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { GenerateImageBody, NSFWResult } from '../types';
 import { getRapidAPIHeaders } from '../utils/utils';
 
-/**
- * Helper function to translate text to a target language
- * @param {string} text - Text to translate
- * @param {string} targetLanguage - Target language code (default: 'en')
- * @returns {Promise<string>} Translated text
- */
 const translateTextHelper = async (text: string, targetLanguage: string = 'en'): Promise<string> => {
 	const host = 'ai-translate.p.rapidapi.com';
 	const headers = getRapidAPIHeaders(host);
@@ -30,16 +25,6 @@ const translateTextHelper = async (text: string, targetLanguage: string = 'en'):
 	return data[0].texts[0];
 };
 
-interface NSFWResult {
-	sexual_score: number;
-	[key: string]: any;
-}
-
-/**
- * Helper function to check if text contains NSFW content
- * @param {string} text - Text to check
- * @returns {Promise<object>} NSFW check result
- */
 const checkNSFWHelper = async (text: string): Promise<NSFWResult> => {
 	const host = 'nsfw-text-detection.p.rapidapi.com';
 	const headers = getRapidAPIHeaders(host);
@@ -55,12 +40,6 @@ const checkNSFWHelper = async (text: string): Promise<NSFWResult> => {
 	return await response.json();
 };
 
-/**
- * Helper function to generate an image from a prompt
- * @param {string} prompt - Image generation prompt
- * @param {number} size - Image dimensions (width and height)
- * @returns {Promise<string>} Base64 encoded image
- */
 const generateImageHelper = async (prompt: string, size: number = 512): Promise<string> => {
 	const body = {
 		prompt,
@@ -91,12 +70,6 @@ const generateImageHelper = async (prompt: string, size: number = 512): Promise<
 
 	return `data:image/png;base64,${base64Image}`;
 };
-
-interface GenerateImageBody {
-	text: string;
-	targetLanguage?: string;
-	size?: number;
-}
 
 /**
  * @desc Translate text, check for NSFW, and generate image

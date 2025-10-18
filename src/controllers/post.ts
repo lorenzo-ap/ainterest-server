@@ -2,6 +2,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthenticatedRequest } from '../middleware/auth-middleware';
 import { Post } from '../models';
+import { CreatePostBody } from '../types';
 
 /**
 	@desc Get all posts
@@ -36,11 +37,6 @@ export const getUserPosts = async (request: FastifyRequest<{ Params: { id: strin
 		return reply.status(500).send(error);
 	}
 };
-
-interface CreatePostBody {
-	prompt: string;
-	photo: string;
-}
 
 /**
 	@desc Create post
