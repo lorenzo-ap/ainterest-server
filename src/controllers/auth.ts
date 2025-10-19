@@ -9,7 +9,7 @@ import { LoginBody, RegisterBody } from '../types';
 const accessTokenCookieOptions: CookieSerializeOptions = {
 	httpOnly: true,
 	secure: true,
-	sameSite: 'none',
+	sameSite: 'strict',
 	maxAge: 5 * 60 * 1000, // 5 minutes,
 	path: '/'
 };
@@ -17,7 +17,7 @@ const accessTokenCookieOptions: CookieSerializeOptions = {
 const refreshTokenCookieOptions: CookieSerializeOptions = {
 	httpOnly: true,
 	secure: true,
-	sameSite: 'none',
+	sameSite: 'strict',
 	maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 	path: '/api/v1/auth'
 };
