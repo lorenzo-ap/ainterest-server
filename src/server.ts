@@ -35,11 +35,11 @@ server.get('/', async (request, reply) => {
 
 const start = async () => {
 	try {
-		const mongodbUrl = process.env.MONGODB_URL;
-		if (!mongodbUrl) {
+		const mongodbURL = process.env.MONGODB_URL;
+		if (!mongodbURL) {
 			throw new Error('MONGODB_URL is not defined in environment variables');
 		}
-		await connectDB(mongodbUrl);
+		await connectDB(mongodbURL);
 
 		const port = 9999;
 		await server.listen({ port });

@@ -7,16 +7,32 @@ export interface IUser extends Document {
 	password: string;
 	photo: string;
 	role: 'user' | 'admin';
-	refreshToken: string | null;
 }
 
 const userSchema = new mongoose.Schema({
-	username: { type: String, required: [true, 'Please add a username'], unique: true },
-	email: { type: String, required: [true, 'Please add an email'], unique: true },
-	password: { type: String, required: [true, 'Please add a password'] },
-	photo: { type: String, default: '' },
-	role: { type: String, enum: ['user', 'admin'], default: 'user' },
-	refreshToken: { type: String, default: null }
+	username: {
+		type: String,
+		required: [true, 'Please add a username'],
+		unique: true
+	},
+	email: {
+		type: String,
+		required: [true, 'Please add an email'],
+		unique: true
+	},
+	password: {
+		type: String,
+		required: [true, 'Please add a password']
+	},
+	photo: {
+		type: String,
+		default: ''
+	},
+	role: {
+		type: String,
+		enum: ['user', 'admin'],
+		default: 'user'
+	}
 });
 
 export const User = mongoose.model<IUser>('User', userSchema);

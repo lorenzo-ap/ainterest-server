@@ -21,16 +21,38 @@ const postSchema = new mongoose.Schema(
 	{
 		user: {
 			type: {
-				_id: { type: mongoose.Schema.Types.ObjectId, required: true },
-				username: { type: String, required: true },
-				email: { type: String, required: true },
-				photo: { type: String }
+				_id: {
+					type: mongoose.Schema.Types.ObjectId,
+					required: true
+				},
+				username: {
+					type: String,
+					required: true
+				},
+				email: {
+					type: String,
+					required: true
+				},
+				photo: {
+					type: String
+				}
 			},
 			required: true
 		},
-		prompt: { type: String, required: [true, 'Please add a prompt'] },
-		photo: { type: String, required: [true, 'Please add a photo'] },
-		likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+		prompt: {
+			type: String,
+			required: [true, 'Please add a prompt']
+		},
+		photo: {
+			type: String,
+			required: [true, 'Please add a photo']
+		},
+		likes: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: 'User'
+			}
+		]
 	},
 	{
 		timestamps: true
