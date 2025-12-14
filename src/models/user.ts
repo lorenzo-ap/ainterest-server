@@ -1,7 +1,7 @@
-import mongoose, { Document } from 'mongoose';
+import { Schema, Types, model } from 'mongoose';
 
-export interface IUser extends Document {
-	_id: mongoose.Types.ObjectId;
+export interface IUser {
+	_id: Types.ObjectId;
 	username: string;
 	email: string;
 	password: string;
@@ -9,7 +9,7 @@ export interface IUser extends Document {
 	role: 'user' | 'admin';
 }
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
 	username: {
 		type: String,
 		required: [true, 'Please add a username'],
@@ -35,4 +35,4 @@ const userSchema = new mongoose.Schema({
 	}
 });
 
-export const User = mongoose.model<IUser>('User', userSchema);
+export const User = model<IUser>('User', userSchema);

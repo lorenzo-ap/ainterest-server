@@ -1,28 +1,28 @@
-import mongoose, { Document } from 'mongoose';
+import { Schema, Types, model } from 'mongoose';
 
 export interface IPostUser {
-	_id: mongoose.Types.ObjectId;
+	_id: Types.ObjectId;
 	username: string;
 	email: string;
 	photo?: string;
 }
 
-export interface IPost extends Document {
-	_id: mongoose.Types.ObjectId;
+export interface IPost {
+	_id: Types.ObjectId;
 	user: IPostUser;
 	prompt: string;
 	photo: string;
-	likes: mongoose.Types.ObjectId[];
+	likes: Types.ObjectId[];
 	createdAt: Date;
 	updatedAt: Date;
 }
 
-const postSchema = new mongoose.Schema(
+const postSchema = new Schema(
 	{
 		user: {
 			type: {
 				_id: {
-					type: mongoose.Schema.Types.ObjectId,
+					type: Schema.Types.ObjectId,
 					required: true
 				},
 				username: {
@@ -49,7 +49,7 @@ const postSchema = new mongoose.Schema(
 		},
 		likes: [
 			{
-				type: mongoose.Schema.Types.ObjectId,
+				type: Schema.Types.ObjectId,
 				ref: 'User'
 			}
 		]
@@ -59,4 +59,4 @@ const postSchema = new mongoose.Schema(
 	}
 );
 
-export const Post = mongoose.model<IPost>('Post', postSchema);
+export const Post = model<IPost>('Post', postSchema);
