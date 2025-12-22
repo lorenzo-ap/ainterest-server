@@ -1,8 +1,9 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthenticatedRequest } from '../middleware/auth-middleware';
-import { Post } from '../models';
-import { CreatePostBody } from '../types';
+import { Notification, Post } from '../models';
+import { CreatePostBody, NotificationType } from '../types';
+import { createNotification } from './notification';
 
 /**
 	@desc Get all posts
@@ -78,6 +79,7 @@ export const deletePost = async (request: FastifyRequest, reply: FastifyReply) =
 		const { id } = request.params as { id: string };
 
 		await Post.findByIdAndDelete(id);
+		await Notification.deleteMany({ postId: id });
 
 		return reply.status(200).send({ message: 'Post deleted' });
 	} catch (error) {
@@ -102,8 +104,25 @@ export const likePost = async (request: FastifyRequest, reply: FastifyReply) => 
 			return reply.status(404).send({ message: 'Post not found' });
 		}
 
-		if (!post.likes.includes(authenticatedRequest.user._id)) {
+		const isAlreadyLiked = post.likes.includes(authenticatedRequest.user._id);
+
+		if (!isAlreadyLiked) {
 			post.likes.push(authenticatedRequest.user._id);
+
+			const isOwnPost = post.user._id.toString() === authenticatedRequest.user._id.toString();
+			if (!isOwnPost) {
+				createNotification({
+					userId: post.user._id.toString(),
+					actorId: authenticatedRequest.user._id.toString(),
+					actorUsername: authenticatedRequest.user.username,
+					actorPhoto: authenticatedRequest.user.photo,
+					type: NotificationType.LIKE,
+					postId: post._id.toString(),
+					postPhoto: post.photo
+				}).catch((error) => {
+					request.log.error('Failed to create notification:', error);
+				});
+			}
 		} else {
 			post.likes = post.likes.filter((like) => like.toString() !== authenticatedRequest.user._id.toString());
 		}

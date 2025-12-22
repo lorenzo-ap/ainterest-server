@@ -3,7 +3,7 @@ import cors from '@fastify/cors';
 import { v2 as cloudinary } from 'cloudinary';
 import fastify, { FastifyInstance } from 'fastify';
 import { connectDB } from './middleware';
-import { authRoutes, generateRoutes, postRoutes, userRoutes } from './routes';
+import { authRoutes, generateRoutes, notificationRoutes, postRoutes, userRoutes } from './routes';
 
 const server: FastifyInstance = fastify({
 	logger: true,
@@ -26,10 +26,11 @@ cloudinary.config({
 
 server.register(authRoutes, { prefix: '/api/v1/auth' });
 server.register(userRoutes, { prefix: '/api/v1/user' });
-server.register(postRoutes, { prefix: '/api/v1/posts' });
+server.register(postRoutes, { prefix: '/api/v1/post' });
 server.register(generateRoutes, { prefix: '/api/v1/generate' });
+server.register(notificationRoutes, { prefix: '/api/v1/notification' });
 
-server.get('/', async (request, reply) => {
+server.get('/', async () => {
 	return { status: 'ok', message: 'Hello server!' };
 });
 
