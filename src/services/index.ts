@@ -1,1 +1,2 @@
-export * from './sse-manager';
+export * from './email';
+export * from './sse';

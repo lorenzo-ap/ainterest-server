@@ -7,6 +7,8 @@ export interface IUser {
 	password: string;
 	photo: string;
 	role: 'user' | 'admin';
+	resetPasswordToken?: string;
+	resetPasswordExpires?: Date;
 }
 
 const userSchema = new Schema({
@@ -32,6 +34,12 @@ const userSchema = new Schema({
 		type: String,
 		enum: ['user', 'admin'],
 		default: 'user'
+	},
+	resetPasswordToken: {
+		type: String
+	},
+	resetPasswordExpires: {
+		type: Date
 	}
 });
 

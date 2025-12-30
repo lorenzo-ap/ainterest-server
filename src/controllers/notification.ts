@@ -79,7 +79,7 @@ export const markAllNotificationsAsRead = async (request: FastifyRequest, reply:
 
 		const result = await Notification.updateMany({ userId, read: false }, { read: true });
 
-		return reply.status(200).send({ message: 'All notifications marked as read', modifiedCount: result.modifiedCount });
+		return reply.status(200).send({ modifiedCount: result.modifiedCount });
 	} catch (error) {
 		request.log.error(error);
 		return reply.status(500).send({ message: 'Error marking all notifications as read' });
@@ -122,7 +122,7 @@ export const deleteAllNotifications = async (request: FastifyRequest, reply: Fas
 
 		const result = await Notification.deleteMany({ userId });
 
-		return reply.status(200).send({ message: 'All notifications deleted', deletedCount: result.deletedCount });
+		return reply.status(200).send({ deletedCount: result.deletedCount });
 	} catch (error) {
 		request.log.error(error);
 		return reply.status(500).send({ message: 'Error deleting all notifications' });

@@ -2,7 +2,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthenticatedRequest } from '../middleware/auth-middleware';
 import { Notification, Post } from '../models';
-import { CreatePostBody, NotificationType } from '../types';
+import { CreatePostBody, NotificationType, PostParams } from '../types';
 import { createNotification } from './notification';
 
 /**
@@ -74,9 +74,21 @@ export const createPost = async (request: FastifyRequest, reply: FastifyReply) =
 	@route DELETE /api/v1/posts/:id
 	@access Private
 **/
-export const deletePost = async (request: FastifyRequest, reply: FastifyReply) => {
+export const deletePost = async (request: FastifyRequest<PostParams>, reply: FastifyReply) => {
 	try {
-		const { id } = request.params as { id: string };
+		const authenticatedRequest = request as AuthenticatedRequest;
+		const { id } = request.params;
+
+		const post = await Post.findById(id);
+
+		if (!post) {
+			return reply.status(404).send({ message: 'Post not found' });
+		}
+
+		const isOwner = post.user._id.toString() === authenticatedRequest.user._id.toString();
+		if (!isOwner) {
+			return reply.status(403).send({ message: 'Unauthorized to delete this post' });
+		}
 
 		await Post.findByIdAndDelete(id);
 		await Notification.deleteMany({ postId: id });

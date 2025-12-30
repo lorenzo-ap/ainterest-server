@@ -12,3 +12,12 @@ export interface LoginBody {
 export interface GoogleAuthBody {
 	credential: string;
 }
+
+export interface ForgotPasswordBody {
+	email: string;
+}
+
+export interface ResetPasswordBody {
+	token: string;
+	password: string;
+}
