@@ -1,8 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { AuthenticatedRequest } from '../middleware/auth-middleware';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AuthenticatedRequest } from '../middleware/auth-middleware';
 import { Notification, Post } from '../models';
-import { CreatePostBody, NotificationType, PostParams } from '../types';
+import { type CreatePostBody, NotificationType, type PostParams } from '../types';
 import { createNotification } from './notification';
 
 /**

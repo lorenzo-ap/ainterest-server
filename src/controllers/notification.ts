@@ -1,9 +1,9 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { Types } from 'mongoose';
-import { AuthenticatedRequest } from '../middleware';
+import type { AuthenticatedRequest } from '../middleware';
 import { Notification } from '../models';
 import { sseManager } from '../services';
-import { CreateNotificationBody, NotificationParams } from '../types';
+import type { CreateNotificationBody, NotificationParams } from '../types';
 
 /**
  * @desc Get user's notifications

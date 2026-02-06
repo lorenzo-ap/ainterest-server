@@ -1,7 +1,7 @@
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import { v2 as cloudinary } from 'cloudinary';
-import fastify, { FastifyInstance } from 'fastify';
+import fastify, { type FastifyInstance } from 'fastify';
 import { connectDB } from './middleware';
 import { authRoutes, generateRoutes, notificationRoutes, postRoutes, userRoutes } from './routes';
 

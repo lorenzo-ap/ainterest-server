@@ -1,8 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { AuthenticatedRequest } from '../middleware/auth-middleware';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AuthenticatedRequest } from '../middleware/auth-middleware';
 import { Post, User } from '../models';
-import { EditUserBody } from '../types';
+import type { EditUserBody } from '../types';
 
 /**
 	@desc Get user data

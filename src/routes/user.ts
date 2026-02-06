@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { currentUser, editUser, getUserByUsername } from '../controllers/user';
 import { protect } from '../middleware/auth-middleware';
 

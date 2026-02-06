@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import { passwordResetEmail } from '../assets/emails';
-import { SendEmailBody, SendEmailOptions } from '../types';
+import type { SendEmailBody, SendEmailOptions } from '../types';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

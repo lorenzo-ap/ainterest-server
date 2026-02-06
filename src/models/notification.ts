@@ -1,5 +1,5 @@
-import { Schema, Types, model } from 'mongoose';
-import { NotificationType } from '../types';
+import { model, Schema, type Types } from 'mongoose';
+import type { NotificationType } from '../types';
 
 export interface INotification {
 	_id: Types.ObjectId;

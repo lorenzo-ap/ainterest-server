@@ -1,6 +1,6 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { GenerateImageBody, NSFWResult } from '../types';
-import { getRapidAPIHeaders } from '../utils/utils';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { GenerateImageBody, NSFWResult } from '../types';
+import { getEnvNumber, getRapidAPIHeaders } from '../utils/utils';
 
 const translateTextHelper = async (text: string, targetLanguage: string = 'en'): Promise<string> => {
 	const host = 'ai-translate.p.rapidapi.com';
@@ -46,7 +46,7 @@ const generateImageHelper = async (prompt: string, size: number = 512): Promise<
 		negative_prompt: 'NSFW',
 		width: size,
 		height: size,
-		num_steps: +process.env.IMAGE_GENERATOR_NUM_STEPS!
+		num_steps: getEnvNumber('IMAGE_GENERATOR_NUM_STEPS')
 	};
 
 	const response = await fetch(
@@ -107,8 +107,17 @@ export const generateImage = async (request: FastifyRequest, reply: FastifyReply
 			nsfwCheck: nsfwData,
 			image
 		});
-	} catch (error: any) {
-		request.log.error('Error in pipeline:', error.message);
-		return reply.status(500).send({ error: 'Internal server error', details: error.message });
+	} catch (error) {
+		if (error instanceof Error) {
+			request.log.error(`Error in pipeline: ${error.message}`);
+			return reply.status(500).send({
+				error: 'Internal server error',
+				details: error.message
+			});
+		}
+
+		return reply.status(500).send({
+			error: 'Internal server error'
+		});
 	}
 };

@@ -1,7 +1,7 @@
-import { FastifyInstance } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { createPost, deletePost, getPosts, getUserPosts, likePost } from '../controllers/post';
 import { protect } from '../middleware/auth-middleware';
-import { PostParams } from '../types';
+import type { PostParams } from '../types';
 
 export async function postRoutes(server: FastifyInstance) {
 	server.post('/', { preHandler: protect }, createPost);

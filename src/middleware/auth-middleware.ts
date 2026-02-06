@@ -1,6 +1,7 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
-import { IUser, User } from '../models';
+import { type IUser, User } from '../models';
+import { getEnvString } from '../utils/utils';
 
 export interface AuthenticatedRequest extends FastifyRequest {
 	user: Omit<IUser, 'password'>;
@@ -15,7 +16,7 @@ export const protect = async (request: FastifyRequest, reply: FastifyReply) => {
 	}
 
 	try {
-		const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET!) as jwt.JwtPayload;
+		const decoded = jwt.verify(accessToken, getEnvString('JWT_ACCESS_SECRET')) as jwt.JwtPayload;
 		const user = await User.findById(decoded.id).select('-password');
 
 		if (!user) {
@@ -23,13 +24,17 @@ export const protect = async (request: FastifyRequest, reply: FastifyReply) => {
 		}
 
 		authenticatedRequest.user = user as Omit<IUser, 'password'>;
-	} catch (error: any) {
+	} catch (error: unknown) {
 		authenticatedRequest.log.error(error);
 
-		if (error.name === 'TokenExpiredError') {
+		if (error instanceof jwt.TokenExpiredError) {
 			return reply.status(401).send({ message: 'Access token expired' });
 		}
 
-		return reply.status(401).send({ message: 'Not authorized, invalid token' });
+		if (error instanceof jwt.JsonWebTokenError) {
+			return reply.status(401).send({ message: 'Not authorized, invalid token' });
+		}
+
+		return reply.status(401).send({ message: 'Not authorized' });
 	}
 };

@@ -1,7 +1,7 @@
-import { FastifyReply } from 'fastify';
-import { Types } from 'mongoose';
-import { INotification } from '../models';
-import { SSEConnection, SSEMessage } from '../types';
+import type { FastifyReply } from 'fastify';
+import type { Types } from 'mongoose';
+import type { INotification } from '../models';
+import type { SSEConnection, SSEMessage } from '../types';
 
 class SSEConnectionManager {
 	private connections: Map<string, Set<SSEConnection>> = new Map();
@@ -28,7 +28,7 @@ class SSEConnectionManager {
 		if (!this.connections.has(userId)) {
 			this.connections.set(userId, new Set());
 		}
-		this.connections.get(userId)!.add(connection);
+		this.connections.get(userId)?.add(connection);
 
 		reply.raw.on('close', () => {
 			this.removeConnection(connection);
@@ -88,7 +88,7 @@ class SSEConnectionManager {
 		const userIdStr = userId.toString();
 		const userConnections = this.connections.get(userIdStr);
 
-		if (userConnections && userConnections.size) {
+		if (userConnections?.size) {
 			const message: SSEMessage = {
 				type: 'notification',
 				payload: notification

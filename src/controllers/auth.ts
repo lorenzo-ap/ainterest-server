@@ -1,12 +1,13 @@
-import { CookieSerializeOptions } from '@fastify/cookie';
+import type { CookieSerializeOptions } from '@fastify/cookie';
 import bcrypt from 'bcryptjs';
-import { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
-import { AuthenticatedRequest } from '../middleware';
+import type { AuthenticatedRequest } from '../middleware';
 import { RefreshToken, User } from '../models';
 import { sendPasswordResetEmail } from '../services';
-import { ForgotPasswordBody, GoogleAuthBody, LoginBody, RegisterBody, ResetPasswordBody } from '../types';
+import type { ForgotPasswordBody, GoogleAuthBody, LoginBody, RegisterBody, ResetPasswordBody } from '../types';
+import { getEnvString } from '../utils/utils';
 
 const ACCESS_TOKEN_EXPIRY_MINUTES = 5;
 const ACCESS_TOKEN_EXPIRY_MS = ACCESS_TOKEN_EXPIRY_MINUTES * 60 * 1000;
@@ -40,19 +41,19 @@ const refreshTokenCookieOptions: CookieSerializeOptions = {
 };
 
 const generateAccessToken = (id: string) => {
-	return jwt.sign({ id }, process.env.JWT_ACCESS_SECRET!, {
+	return jwt.sign({ id }, getEnvString('JWT_ACCESS_SECRET'), {
 		expiresIn: ACCESS_TOKEN_EXPIRY_JWT
 	});
 };
 
 const generateRefreshToken = (id: string) => {
-	return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET!, {
+	return jwt.sign({ id }, getEnvString('JWT_REFRESH_SECRET'), {
 		expiresIn: REFRESH_TOKEN_EXPIRY_JWT
 	});
 };
 
 const generateResetToken = (id: string) => {
-	return jwt.sign({ id }, process.env.JWT_RESET_SECRET!, {
+	return jwt.sign({ id }, getEnvString('JWT_RESET_SECRET'), {
 		expiresIn: RESET_TOKEN_EXPIRY_JWT
 	});
 };
@@ -238,7 +239,7 @@ export const refreshToken = async (request: FastifyRequest, reply: FastifyReply)
 	}
 
 	try {
-		const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as jwt.JwtPayload;
+		const decoded = jwt.verify(refreshToken, getEnvString('JWT_REFRESH_SECRET')) as jwt.JwtPayload;
 
 		const storedToken = await RefreshToken.findOne({
 			token: refreshToken,
@@ -375,7 +376,7 @@ export const resetPassword = async (request: FastifyRequest<{ Body: ResetPasswor
 	}
 
 	try {
-		const decoded = jwt.verify(token, process.env.JWT_RESET_SECRET!) as jwt.JwtPayload;
+		const decoded = jwt.verify(token, getEnvString('JWT_RESET_SECRET')) as jwt.JwtPayload;
 
 		const user = await User.findOne({
 			_id: decoded.id,

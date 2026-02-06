@@ -1,5 +1,5 @@
-import { FastifyReply } from 'fastify/types/reply';
-import { INotification } from '../models';
+import type { FastifyReply } from 'fastify/types/reply';
+import type { INotification } from '../models';
 
 export type SSEMessageType = 'notification' | 'heartbeat';
 
