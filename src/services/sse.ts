@@ -1,5 +1,6 @@
 import type { FastifyReply } from 'fastify';
 import type { Types } from 'mongoose';
+import { serializeMongo } from '../serializers';
 import type { Notification, SSEConnection, SSEMessage } from '../types';
 
 class SSEConnectionManager {
@@ -63,7 +64,7 @@ class SSEConnectionManager {
 
 	private sendMessage(connection: SSEConnection, message: SSEMessage): void {
 		try {
-			const data = `data: ${JSON.stringify(message)}\n\n`;
+			const data = `data: ${JSON.stringify(serializeMongo(message))}\n\n`;
 			connection.reply.raw.write(data);
 		} catch (error) {
 			console.error('Error sending SSE message:', error);

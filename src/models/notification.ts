@@ -24,7 +24,7 @@ const notificationSchema = new Schema(
 		},
 		type: {
 			type: String,
-			enum: ['like'],
+			enum: ['LIKE'],
 			required: true
 		},
 		postId: {

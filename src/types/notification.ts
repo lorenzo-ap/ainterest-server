@@ -15,7 +15,7 @@ export interface Notification {
 }
 
 export enum NotificationType {
-	LIKE = 'like'
+	LIKE = 'LIKE'
 }
 
 export interface CreateNotificationBody {

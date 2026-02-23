@@ -1,5 +1,3 @@
-// at least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
-
 import { PASSWORD_REGEX } from '../constants';
 
 export const loginSchema = {

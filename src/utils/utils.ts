@@ -1,6 +1,6 @@
 export const getRapidAPIHeaders = (host: string): Record<string, string> => {
 	return {
-		'x-rapidapi-key': process.env.RAPIDAPI_KEY || '',
+		'x-rapidapi-key': getEnvString('RAPIDAPI_KEY'),
 		'x-rapidapi-host': host,
 		'Content-Type': 'application/json'
 	};
@@ -26,4 +26,8 @@ export const getEnvString = (key: string): string => {
 		throw new Error(`Missing env var: ${key}`);
 	}
 	return value;
+};
+
+export const isObjectLike = (value: unknown): value is Record<string, unknown> => {
+	return value !== null && typeof value === 'object';
 };

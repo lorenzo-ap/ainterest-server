@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { NotificationModel, PostModel } from '../models';
-import { type CreatePostRoute, type IdParam, NotificationType } from '../types';
+import { type CreateNotificationBody, type CreatePostRoute, type IdParam, NotificationType } from '../types';
 import { createNotification } from './notification';
 
 /**
@@ -119,7 +119,7 @@ export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyR
 
 			const isOwnPost = post.user._id.toString() === request.user._id.toString();
 			if (!isOwnPost) {
-				createNotification({
+				const body = {
 					userId: post.user._id.toString(),
 					actorId: request.user._id.toString(),
 					actorUsername: request.user.username,
@@ -127,7 +127,9 @@ export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyR
 					type: NotificationType.LIKE,
 					postId: post._id.toString(),
 					postPhoto: post.photo
-				}).catch((error) => {
+				} satisfies CreateNotificationBody;
+
+				createNotification(body).catch((error) => {
 					request.log.error('Failed to create notification:', error);
 				});
 			}
