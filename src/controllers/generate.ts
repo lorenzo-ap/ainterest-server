@@ -2,12 +2,12 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { GenerateImageRoute, NSFWResult } from '../types';
 import { getEnvNumber, getRapidAPIHeaders } from '../utils/utils';
 
-const translateTextHelper = async (text: string, targetLanguage: string = 'en'): Promise<string> => {
+const translateTextHelper = async (text: string): Promise<string> => {
 	const host = 'ai-translate.p.rapidapi.com';
 	const headers = getRapidAPIHeaders(host);
 	const body = {
 		texts: [text],
-		tls: [targetLanguage],
+		tls: ['en'],
 		sl: 'auto'
 	};
 
@@ -78,13 +78,9 @@ const generateImageHelper = async (prompt: string, size: number = 512): Promise<
  */
 export const generateImage = async (request: FastifyRequest<GenerateImageRoute>, reply: FastifyReply) => {
 	try {
-		const { text, targetLanguage = 'en', size = 512 } = request.body;
+		const { text, size = 512 } = request.body;
 
-		if (!text) {
-			return reply.status(400).send({ error: 'Text is required' });
-		}
-
-		const translatedText = await translateTextHelper(text, targetLanguage);
+		const translatedText = await translateTextHelper(text);
 		const nsfwData = await checkNSFWHelper(translatedText);
 
 		if (nsfwData.sexual_score > 0.3) {

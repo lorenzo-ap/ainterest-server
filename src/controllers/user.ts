@@ -59,14 +59,12 @@ export const editUser = async (request: FastifyRequest<EditUserRoute>, reply: Fa
 
 	if (username) user.username = username;
 	if (email) user.email = email;
-
 	if (photo) {
-		const cloudinaryPhoto = await cloudinary.uploader.upload(`data:image/jpeg;base64,${photo}`, {
+		const cloudinaryPhoto = await cloudinary.uploader.upload(photo, {
 			folder: 'users',
 			width: 150,
 			crop: 'scale'
 		});
-
 		user.photo = cloudinaryPhoto.secure_url;
 	}
 

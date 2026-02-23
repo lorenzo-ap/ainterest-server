@@ -146,10 +146,6 @@ export const loginUser = async (request: FastifyRequest<LoginRoute>, reply: Fast
 export const googleAuth = async (request: FastifyRequest<GoogleAuthRoute>, reply: FastifyReply) => {
 	const { credential } = request.body;
 
-	if (!credential) {
-		return reply.status(400).send({ message: 'Google credential is required' });
-	}
-
 	if (!process.env.GOOGLE_CLIENT_ID) {
 		request.log.error('GOOGLE_CLIENT_ID environment variable is not set');
 		return reply.status(500).send({ message: 'Google authentication is not configured' });
@@ -311,10 +307,6 @@ export const logoutAllDevices = async (request: FastifyRequest, reply: FastifyRe
 export const forgotPassword = async (request: FastifyRequest<ForgotPasswordRoute>, reply: FastifyReply) => {
 	const { email } = request.body;
 
-	if (!email) {
-		return reply.status(400).send({ message: 'Email is required' });
-	}
-
 	try {
 		const user = await UserModel.findOne({ email });
 
@@ -351,10 +343,6 @@ export const forgotPassword = async (request: FastifyRequest<ForgotPasswordRoute
 **/
 export const resetPassword = async (request: FastifyRequest<ResetPasswordRoute>, reply: FastifyReply) => {
 	const { token, password } = request.body;
-
-	if (!token || !password) {
-		return reply.status(400).send({ message: 'Token and password are required' });
-	}
 
 	try {
 		const decoded = jwt.verify(token, getEnvString('JWT_RESET_SECRET')) as jwt.JwtPayload;

@@ -8,7 +8,6 @@ export interface NSFWResult {
 
 export interface GenerateImageBody {
 	text: string;
-	targetLanguage?: string;
 	size?: number;
 }
 
