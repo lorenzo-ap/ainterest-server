@@ -9,15 +9,19 @@ import {
 	registerUser,
 	resetPassword
 } from '../controllers/auth';
-import { protect } from '../middleware/auth-middleware';
+import { protect } from '../hooks';
+import { loginSchema, registerSchema } from '../schemas';
+import type { ForgotPasswordRoute, GoogleAuthRoute, LoginRoute, RegisterRoute, ResetPasswordRoute } from '../types';
 
 export async function authRoutes(server: FastifyInstance) {
-	server.post('/register', registerUser);
-	server.post('/login', loginUser);
-	server.post('/google', googleAuth);
+	server.post<LoginRoute>('/login', { schema: loginSchema }, loginUser);
+	server.post<RegisterRoute>('/register', { schema: registerSchema }, registerUser);
+	server.post<GoogleAuthRoute>('/google', googleAuth);
 	server.post('/refresh', refreshToken);
+
+	server.post<ForgotPasswordRoute>('/forgot-password', forgotPassword);
+	server.post<ResetPasswordRoute>('/reset-password', resetPassword);
+
 	server.post('/logout', { preHandler: protect }, logoutUser);
 	server.post('/logout-all', { preHandler: protect }, logoutAllDevices);
-	server.post('/forgot-password', forgotPassword);
-	server.post('/reset-password', resetPassword);
 }

@@ -1,21 +1,5 @@
-import { model, Schema, type Types } from 'mongoose';
-
-export interface IPostUser {
-	_id: Types.ObjectId;
-	username: string;
-	email: string;
-	photo?: string;
-}
-
-export interface IPost {
-	_id: Types.ObjectId;
-	user: IPostUser;
-	prompt: string;
-	photo: string;
-	likes: Types.ObjectId[];
-	createdAt: Date;
-	updatedAt: Date;
-}
+import { model, Schema } from 'mongoose';
+import type { Post } from '../types';
 
 const postSchema = new Schema(
 	{
@@ -59,4 +43,4 @@ const postSchema = new Schema(
 	}
 );
 
-export const Post = model<IPost>('Post', postSchema);
+export const PostModel = model<Post>('Post', postSchema);

@@ -1,3 +1,5 @@
+import type { RouteWithBody } from './http';
+
 export interface NSFWResult {
 	flagged: boolean;
 	sexual: boolean;
@@ -9,3 +11,5 @@ export interface GenerateImageBody {
 	targetLanguage?: string;
 	size?: number;
 }
+
+export type GenerateImageRoute = RouteWithBody<GenerateImageBody>;

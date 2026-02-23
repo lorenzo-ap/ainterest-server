@@ -1,12 +1,13 @@
 import type { FastifyInstance } from 'fastify';
 import { createPost, deletePost, getPosts, getUserPosts, likePost } from '../controllers/post';
-import { protect } from '../middleware/auth-middleware';
-import type { PostParams } from '../types';
+import { protect } from '../hooks';
+import type { CreatePostRoute, IdParam } from '../types';
 
 export async function postRoutes(server: FastifyInstance) {
-	server.post('/', { preHandler: protect }, createPost);
 	server.get('/', getPosts);
-	server.get('/:id', getUserPosts);
-	server.put('/:id', { preHandler: protect }, likePost);
-	server.delete<PostParams>('/:id', { preHandler: protect }, deletePost);
+	server.post<CreatePostRoute>('/', { preHandler: protect }, createPost);
+
+	server.get<IdParam>('/:id', getUserPosts);
+	server.put<IdParam>('/:id', { preHandler: protect }, likePost);
+	server.delete<IdParam>('/:id', { preHandler: protect }, deletePost);
 }

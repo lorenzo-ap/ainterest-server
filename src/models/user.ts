@@ -1,15 +1,5 @@
-import { model, Schema, type Types } from 'mongoose';
-
-export interface IUser {
-	_id: Types.ObjectId;
-	username: string;
-	email: string;
-	password: string;
-	photo: string;
-	role: 'user' | 'admin';
-	resetPasswordToken?: string;
-	resetPasswordExpires?: Date;
-}
+import { model, Schema } from 'mongoose';
+import type { User } from '../types';
 
 const userSchema = new Schema({
 	username: {
@@ -43,4 +33,4 @@ const userSchema = new Schema({
 	}
 });
 
-export const User = model<IUser>('User', userSchema);
+export const UserModel = model<User>('User', userSchema);

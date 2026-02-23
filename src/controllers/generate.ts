@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { GenerateImageBody, NSFWResult } from '../types';
+import type { GenerateImageRoute, NSFWResult } from '../types';
 import { getEnvNumber, getRapidAPIHeaders } from '../utils/utils';
 
 const translateTextHelper = async (text: string, targetLanguage: string = 'en'): Promise<string> => {
@@ -76,21 +76,17 @@ const generateImageHelper = async (prompt: string, size: number = 512): Promise<
  * @route POST /api/v1/generate/image
  * @access Private
  */
-export const generateImage = async (request: FastifyRequest, reply: FastifyReply) => {
+export const generateImage = async (request: FastifyRequest<GenerateImageRoute>, reply: FastifyReply) => {
 	try {
-		const { text, targetLanguage = 'en', size = 512 } = request.body as GenerateImageBody;
+		const { text, targetLanguage = 'en', size = 512 } = request.body;
 
 		if (!text) {
 			return reply.status(400).send({ error: 'Text is required' });
 		}
 
-		// Step 1: Translate text
 		const translatedText = await translateTextHelper(text, targetLanguage);
-
-		// Step 2: Check for NSFW content
 		const nsfwData = await checkNSFWHelper(translatedText);
 
-		// If content is NSFW, return error
 		if (nsfwData.sexual_score > 0.3) {
 			return reply.status(400).send({
 				error: 'Content contains explicit or adult content, please try a different one',
@@ -98,7 +94,6 @@ export const generateImage = async (request: FastifyRequest, reply: FastifyReply
 			});
 		}
 
-		// Step 3: Generate image
 		const image = await generateImageHelper(translatedText, size);
 
 		return reply.status(200).send({

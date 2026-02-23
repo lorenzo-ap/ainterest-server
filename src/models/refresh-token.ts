@@ -1,13 +1,5 @@
-import { model, Schema, type Types } from 'mongoose';
-
-export interface IRefreshToken {
-	_id: Types.ObjectId;
-	userId: Types.ObjectId;
-	token: string;
-	expiresAt: Date;
-	createdAt: Date;
-	isExpired(): boolean;
-}
+import { model, Schema } from 'mongoose';
+import type { RefreshToken } from '../types';
 
 const refreshTokenSchema = new Schema(
 	{
@@ -37,4 +29,4 @@ const refreshTokenSchema = new Schema(
 	}
 );
 
-export const RefreshToken = model<IRefreshToken>('RefreshToken', refreshTokenSchema);
+export const RefreshTokenModel = model<RefreshToken>('RefreshToken', refreshTokenSchema);

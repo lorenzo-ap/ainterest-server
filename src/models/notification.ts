@@ -1,19 +1,5 @@
-import { model, Schema, type Types } from 'mongoose';
-import type { NotificationType } from '../types';
-
-export interface INotification {
-	_id: Types.ObjectId;
-	userId: Types.ObjectId;
-	actorId: Types.ObjectId;
-	actorUsername: string;
-	actorPhoto: string;
-	type: NotificationType.LIKE;
-	postId: Types.ObjectId;
-	postPhoto: string;
-	read: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-}
+import { model, Schema } from 'mongoose';
+import type { Notification } from '../types';
 
 const notificationSchema = new Schema(
 	{
@@ -64,4 +50,4 @@ const notificationSchema = new Schema(
 notificationSchema.index({ userId: 1, createdAt: -1 });
 notificationSchema.index({ userId: 1, read: 1 });
 
-export const Notification = model<INotification>('Notification', notificationSchema);
+export const NotificationModel = model<Notification>('Notification', notificationSchema);

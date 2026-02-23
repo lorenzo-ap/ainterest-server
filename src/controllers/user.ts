@@ -1,8 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { AuthenticatedRequest } from '../middleware/auth-middleware';
-import { Post, User } from '../models';
-import type { EditUserBody } from '../types';
+import { PostModel, UserModel } from '../models';
+import type { EditUserRoute, UsernameParam } from '../types';
 
 /**
 	@desc Get user data
@@ -10,8 +9,7 @@ import type { EditUserBody } from '../types';
 	@access Private
 **/
 export const currentUser = async (request: FastifyRequest, reply: FastifyReply) => {
-	const authenticatedRequest = request as AuthenticatedRequest;
-	const { _id, username, email, photo, role } = authenticatedRequest.user;
+	const { _id, username, email, photo, role } = request.user;
 
 	return reply.status(200).send({
 		_id,
@@ -27,11 +25,10 @@ export const currentUser = async (request: FastifyRequest, reply: FastifyReply) 
 	@route GET /api/v1/users/:username
 	@access Private
 **/
-export const getUserByUsername = async (
-	request: FastifyRequest<{ Params: { username: string } }>,
-	reply: FastifyReply
-) => {
-	const user = await User.findOne({ username: request.params.username });
+export const getUserByUsername = async (request: FastifyRequest<UsernameParam>, reply: FastifyReply) => {
+	const username = request.params.username;
+
+	const user = await UserModel.findOne({ username });
 
 	if (!user) {
 		return reply.status(400).send({ message: 'User not found' });
@@ -51,17 +48,15 @@ export const getUserByUsername = async (
  * @route PUT /api/v1/users/edit
  * @access Private
  */
-export const editUser = async (request: FastifyRequest, reply: FastifyReply) => {
-	const authenticatedRequest = request as AuthenticatedRequest;
-	const { username, email, photo } = authenticatedRequest.body as EditUserBody;
+export const editUser = async (request: FastifyRequest<EditUserRoute>, reply: FastifyReply) => {
+	const { username, email, photo } = request.body;
 
-	const user = await User.findById(authenticatedRequest.user._id);
+	const user = await UserModel.findById(request.user._id);
 
 	if (!user) {
 		return reply.status(400).send({ message: 'User not found' });
 	}
 
-	// Update user fields
 	if (username) user.username = username;
 	if (email) user.email = email;
 
@@ -77,7 +72,7 @@ export const editUser = async (request: FastifyRequest, reply: FastifyReply) => 
 
 	await user.save();
 
-	await Post.updateMany(
+	await PostModel.updateMany(
 		{ 'user._id': user._id },
 		{
 			'user.username': user.username,

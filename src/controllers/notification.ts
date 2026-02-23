@@ -1,9 +1,8 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { Types } from 'mongoose';
-import type { AuthenticatedRequest } from '../middleware';
-import { Notification } from '../models';
+import { NotificationModel } from '../models';
 import { sseManager } from '../services';
-import type { CreateNotificationBody, NotificationParams } from '../types';
+import type { CreateNotificationBody, IdParam } from '../types';
 
 /**
  * @desc Get user's notifications
@@ -12,10 +11,9 @@ import type { CreateNotificationBody, NotificationParams } from '../types';
  */
 export const getNotifications = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const authenticatedRequest = request as AuthenticatedRequest;
-		const userId = authenticatedRequest.user._id;
+		const userId = request.user._id;
 
-		const notifications = await Notification.find({ userId }).sort({ createdAt: -1 }).limit(50).lean();
+		const notifications = await NotificationModel.find({ userId }).sort({ createdAt: -1 }).limit(50).lean();
 
 		return reply.status(200).send(notifications);
 	} catch (error) {
@@ -31,10 +29,8 @@ export const getNotifications = async (request: FastifyRequest, reply: FastifyRe
  */
 export const getUnreadCount = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const authenticatedRequest = request as AuthenticatedRequest;
-		const userId = authenticatedRequest.user._id;
-
-		const count = await Notification.countDocuments({ userId, read: false });
+		const userId = request.user._id;
+		const count = await NotificationModel.countDocuments({ userId, read: false });
 
 		return reply.status(200).send({ count });
 	} catch (error) {
@@ -48,13 +44,12 @@ export const getUnreadCount = async (request: FastifyRequest, reply: FastifyRepl
  * @route PUT /api/v1/notifications/:id/read
  * @access Private
  */
-export const markNotificationAsRead = async (request: FastifyRequest<NotificationParams>, reply: FastifyReply) => {
+export const markNotificationAsRead = async (request: FastifyRequest<IdParam>, reply: FastifyReply) => {
 	try {
-		const authenticatedRequest = request as AuthenticatedRequest;
 		const { id } = request.params;
-		const userId = authenticatedRequest.user._id;
+		const userId = request.user._id;
 
-		const notification = await Notification.findOneAndUpdate({ _id: id, userId }, { read: true }, { new: true });
+		const notification = await NotificationModel.findOneAndUpdate({ _id: id, userId }, { read: true }, { new: true });
 
 		if (!notification) {
 			return reply.status(404).send({ message: 'Notification not found' });
@@ -74,10 +69,9 @@ export const markNotificationAsRead = async (request: FastifyRequest<Notificatio
  */
 export const markAllNotificationsAsRead = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const authenticatedRequest = request as AuthenticatedRequest;
-		const userId = authenticatedRequest.user._id;
+		const userId = request.user._id;
 
-		const result = await Notification.updateMany({ userId, read: false }, { read: true });
+		const result = await NotificationModel.updateMany({ userId, read: false }, { read: true });
 
 		return reply.status(200).send({ modifiedCount: result.modifiedCount });
 	} catch (error) {
@@ -91,13 +85,12 @@ export const markAllNotificationsAsRead = async (request: FastifyRequest, reply:
  * @route DELETE /api/v1/notifications/:id
  * @access Private
  */
-export const deleteNotification = async (request: FastifyRequest<NotificationParams>, reply: FastifyReply) => {
+export const deleteNotification = async (request: FastifyRequest<IdParam>, reply: FastifyReply) => {
 	try {
-		const authenticatedRequest = request as AuthenticatedRequest;
 		const { id } = request.params;
-		const userId = authenticatedRequest.user._id;
+		const userId = request.user._id;
 
-		const notification = await Notification.findOneAndDelete({ _id: id, userId });
+		const notification = await NotificationModel.findOneAndDelete({ _id: id, userId });
 
 		if (!notification) {
 			return reply.status(404).send({ message: 'Notification not found' });
@@ -117,10 +110,9 @@ export const deleteNotification = async (request: FastifyRequest<NotificationPar
  */
 export const deleteAllNotifications = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const authenticatedRequest = request as AuthenticatedRequest;
-		const userId = authenticatedRequest.user._id;
+		const userId = request.user._id;
 
-		const result = await Notification.deleteMany({ userId });
+		const result = await NotificationModel.deleteMany({ userId });
 
 		return reply.status(200).send({ deletedCount: result.deletedCount });
 	} catch (error) {
@@ -136,8 +128,7 @@ export const deleteAllNotifications = async (request: FastifyRequest, reply: Fas
  */
 export const streamNotifications = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const authenticatedRequest = request as AuthenticatedRequest;
-		const userId = authenticatedRequest.user._id.toString();
+		const userId = request.user._id.toString();
 
 		const frontendUrl = process.env.FRONTEND_URL;
 		sseManager.addConnection(userId, reply, frontendUrl);
@@ -152,7 +143,7 @@ export const streamNotifications = async (request: FastifyRequest, reply: Fastif
  */
 export const createNotification = async (body: CreateNotificationBody): Promise<void> => {
 	try {
-		const notification = await Notification.create({
+		const notification = await NotificationModel.create({
 			userId: new Types.ObjectId(body.userId),
 			actorId: new Types.ObjectId(body.actorId),
 			actorUsername: body.actorUsername,

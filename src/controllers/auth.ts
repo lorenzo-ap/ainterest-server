@@ -3,10 +3,9 @@ import bcrypt from 'bcryptjs';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
-import type { AuthenticatedRequest } from '../middleware';
-import { RefreshToken, User } from '../models';
+import { RefreshTokenModel, UserModel } from '../models';
 import { sendPasswordResetEmail } from '../services';
-import type { ForgotPasswordBody, GoogleAuthBody, LoginBody, RegisterBody, ResetPasswordBody } from '../types';
+import type { ForgotPasswordRoute, GoogleAuthRoute, LoginRoute, RegisterRoute, ResetPasswordRoute } from '../types';
 import { getEnvString } from '../utils/utils';
 
 const ACCESS_TOKEN_EXPIRY_MINUTES = 5;
@@ -62,7 +61,7 @@ const setAuthTokens = async (userId: string, reply: FastifyReply) => {
 	const accessToken = generateAccessToken(userId);
 	const refreshToken = generateRefreshToken(userId);
 
-	await RefreshToken.create({
+	await RefreshTokenModel.create({
 		userId,
 		token: refreshToken,
 		expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS)
@@ -77,39 +76,27 @@ const setAuthTokens = async (userId: string, reply: FastifyReply) => {
 	@route POST /api/v1/auth/register
 	@access Public
 **/
-export const registerUser = async (request: FastifyRequest<{ Body: RegisterBody }>, reply: FastifyReply) => {
+export const registerUser = async (request: FastifyRequest<RegisterRoute>, reply: FastifyReply) => {
 	const { username, email, password } = request.body;
 
-	if (!username || !email || !password) {
-		return reply.status(400).send({ message: 'Please enter all fields' });
-	}
-
-	const usernameExists = await User.findOne({ username });
-
+	const usernameExists = await UserModel.findOne({ username });
 	if (usernameExists) {
 		return reply.status(400).send({ message: 'Username already taken' });
 	}
 
-	const emailExists = await User.findOne({ email });
-
+	const emailExists = await UserModel.findOne({ email });
 	if (emailExists) {
 		return reply.status(400).send({ message: 'Email already taken' });
 	}
 
-	// Hash password
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
 
-	// Create user
-	const user = await User.create({
+	const user = await UserModel.create({
 		username,
 		email,
 		password: hashedPassword
 	});
-
-	if (!user) {
-		return reply.status(400).send({ message: 'Invalid user data' });
-	}
 
 	await setAuthTokens(user._id.toString(), reply);
 
@@ -127,17 +114,15 @@ export const registerUser = async (request: FastifyRequest<{ Body: RegisterBody 
 	@route POST /api/v1/auth/login
 	@access Public
 **/
-export const loginUser = async (request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply) => {
+export const loginUser = async (request: FastifyRequest<LoginRoute>, reply: FastifyReply) => {
 	const { email, password } = request.body;
 
-	const user = await User.findOne({ email });
-
+	const user = await UserModel.findOne({ email });
 	if (!user) {
 		return reply.status(400).send({ message: 'Invalid email' });
 	}
 
 	const rightPassword = await bcrypt.compare(password, user.password);
-
 	if (!rightPassword) {
 		return reply.status(400).send({ message: 'Invalid password' });
 	}
@@ -158,7 +143,7 @@ export const loginUser = async (request: FastifyRequest<{ Body: LoginBody }>, re
 	@route POST /api/v1/auth/google
 	@access Public
 **/
-export const googleAuth = async (request: FastifyRequest<{ Body: GoogleAuthBody }>, reply: FastifyReply) => {
+export const googleAuth = async (request: FastifyRequest<GoogleAuthRoute>, reply: FastifyReply) => {
 	const { credential } = request.body;
 
 	if (!credential) {
@@ -186,24 +171,24 @@ export const googleAuth = async (request: FastifyRequest<{ Body: GoogleAuthBody 
 
 		const { email, name, picture } = payload;
 
-		let user = await User.findOne({ email });
+		let user = await UserModel.findOne({ email });
 
 		if (!user) {
 			let username = name?.replace(/\s+/g, '').toLowerCase() || email.split('@')[0];
 
 			// Check if username is taken and make it unique if needed
-			let usernameExists = await User.findOne({ username });
+			let usernameExists = await UserModel.findOne({ username });
 			let counter = 1;
 			while (usernameExists) {
 				username = `${username}${counter}`;
-				usernameExists = await User.findOne({ username });
+				usernameExists = await UserModel.findOne({ username });
 				counter++;
 			}
 
 			const salt = await bcrypt.genSalt(10);
 			const randomPassword = await bcrypt.hash(Math.random().toString(36), salt);
 
-			user = await User.create({
+			user = await UserModel.create({
 				username,
 				email,
 				password: randomPassword,
@@ -233,7 +218,6 @@ export const googleAuth = async (request: FastifyRequest<{ Body: GoogleAuthBody 
 **/
 export const refreshToken = async (request: FastifyRequest, reply: FastifyReply) => {
 	const refreshToken = request.cookies['refresh-token'];
-
 	if (!refreshToken) {
 		return reply.status(401).send({ message: 'Refresh token required' });
 	}
@@ -241,7 +225,7 @@ export const refreshToken = async (request: FastifyRequest, reply: FastifyReply)
 	try {
 		const decoded = jwt.verify(refreshToken, getEnvString('JWT_REFRESH_SECRET')) as jwt.JwtPayload;
 
-		const storedToken = await RefreshToken.findOne({
+		const storedToken = await RefreshTokenModel.findOne({
 			token: refreshToken,
 			userId: decoded.id
 		});
@@ -251,11 +235,11 @@ export const refreshToken = async (request: FastifyRequest, reply: FastifyReply)
 		}
 
 		if (storedToken.isExpired()) {
-			await RefreshToken.deleteOne({ _id: storedToken._id });
+			await RefreshTokenModel.deleteOne({ _id: storedToken._id });
 			return reply.status(403).send({ message: 'Refresh token expired' });
 		}
 
-		const user = await User.findById(decoded.id);
+		const user = await UserModel.findById(decoded.id);
 
 		if (!user) {
 			return reply.status(403).send({ message: 'User not found' });
@@ -279,13 +263,12 @@ export const refreshToken = async (request: FastifyRequest, reply: FastifyReply)
 **/
 export const logoutUser = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const authenticatedRequest = request as AuthenticatedRequest;
 		const refreshToken = request.cookies['refresh-token'];
 
 		if (refreshToken) {
-			await RefreshToken.deleteOne({
+			await RefreshTokenModel.deleteOne({
 				token: refreshToken,
-				userId: authenticatedRequest.user._id
+				userId: request.user._id
 			});
 		}
 
@@ -306,10 +289,8 @@ export const logoutUser = async (request: FastifyRequest, reply: FastifyReply) =
 **/
 export const logoutAllDevices = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const authenticatedRequest = request as AuthenticatedRequest;
-
-		await RefreshToken.deleteMany({
-			userId: authenticatedRequest.user._id
+		await RefreshTokenModel.deleteMany({
+			userId: request.user._id
 		});
 
 		reply.clearCookie('access-token', accessTokenCookieOptions);
@@ -327,7 +308,7 @@ export const logoutAllDevices = async (request: FastifyRequest, reply: FastifyRe
 	@route POST /api/v1/auth/forgot-password
 	@access Public
 **/
-export const forgotPassword = async (request: FastifyRequest<{ Body: ForgotPasswordBody }>, reply: FastifyReply) => {
+export const forgotPassword = async (request: FastifyRequest<ForgotPasswordRoute>, reply: FastifyReply) => {
 	const { email } = request.body;
 
 	if (!email) {
@@ -335,7 +316,7 @@ export const forgotPassword = async (request: FastifyRequest<{ Body: ForgotPassw
 	}
 
 	try {
-		const user = await User.findOne({ email });
+		const user = await UserModel.findOne({ email });
 
 		if (!user) {
 			return reply
@@ -368,7 +349,7 @@ export const forgotPassword = async (request: FastifyRequest<{ Body: ForgotPassw
 	@route POST /api/v1/auth/reset-password
 	@access Public
 **/
-export const resetPassword = async (request: FastifyRequest<{ Body: ResetPasswordBody }>, reply: FastifyReply) => {
+export const resetPassword = async (request: FastifyRequest<ResetPasswordRoute>, reply: FastifyReply) => {
 	const { token, password } = request.body;
 
 	if (!token || !password) {
@@ -378,7 +359,7 @@ export const resetPassword = async (request: FastifyRequest<{ Body: ResetPasswor
 	try {
 		const decoded = jwt.verify(token, getEnvString('JWT_RESET_SECRET')) as jwt.JwtPayload;
 
-		const user = await User.findOne({
+		const user = await UserModel.findOne({
 			_id: decoded.id,
 			resetPasswordExpires: { $gt: new Date() }
 		});
@@ -401,7 +382,7 @@ export const resetPassword = async (request: FastifyRequest<{ Body: ResetPasswor
 		user.resetPasswordExpires = undefined;
 		await user.save();
 
-		await RefreshToken.deleteMany({ userId: user._id });
+		await RefreshTokenModel.deleteMany({ userId: user._id });
 
 		return reply.status(200).send({ message: 'Password reset successfully' });
 	} catch (error) {

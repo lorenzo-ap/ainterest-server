@@ -1,3 +1,19 @@
+import type { ObjectId } from 'mongoose';
+
+export interface Notification {
+	_id: ObjectId;
+	userId: ObjectId;
+	actorId: ObjectId;
+	actorUsername: string;
+	actorPhoto: string;
+	type: NotificationType.LIKE;
+	postId: ObjectId;
+	postPhoto: string;
+	read: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
 export enum NotificationType {
 	LIKE = 'like'
 }
@@ -10,10 +26,4 @@ export interface CreateNotificationBody {
 	type: NotificationType;
 	postId: string;
 	postPhoto: string;
-}
-
-export interface NotificationParams {
-	Params: {
-		id: string;
-	};
 }

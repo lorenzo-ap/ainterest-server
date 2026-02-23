@@ -1,11 +1,11 @@
 import type { FastifyReply } from 'fastify/types/reply';
-import type { INotification } from '../models';
+import type { Notification } from './notification';
 
 export type SSEMessageType = 'notification' | 'heartbeat';
 
 export interface SSEMessage {
 	type: SSEMessageType;
-	payload?: INotification;
+	payload?: Notification;
 }
 
 export interface SSEConnection {

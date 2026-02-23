@@ -1,7 +1,6 @@
 import type { FastifyReply } from 'fastify';
 import type { Types } from 'mongoose';
-import type { INotification } from '../models';
-import type { SSEConnection, SSEMessage } from '../types';
+import type { Notification, SSEConnection, SSEMessage } from '../types';
 
 class SSEConnectionManager {
 	private connections: Map<string, Set<SSEConnection>> = new Map();
@@ -84,7 +83,7 @@ class SSEConnectionManager {
 		return total;
 	}
 
-	emitNotification(userId: string | Types.ObjectId, notification: INotification): void {
+	emitNotification(userId: string | Types.ObjectId, notification: Notification): void {
 		const userIdStr = userId.toString();
 		const userConnections = this.connections.get(userIdStr);
 
