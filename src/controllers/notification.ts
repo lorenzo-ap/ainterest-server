@@ -1,5 +1,4 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { Types } from 'mongoose';
 import { NotificationModel } from '../models';
 import { sseManager } from '../services';
 import type { CreateNotificationBody, IdParam } from '../types';
@@ -144,12 +143,12 @@ export const streamNotifications = async (request: FastifyRequest, reply: Fastif
 export const createNotification = async (body: CreateNotificationBody): Promise<void> => {
 	try {
 		const notification = await NotificationModel.create({
-			userId: new Types.ObjectId(body.userId),
-			actorId: new Types.ObjectId(body.actorId),
+			userId: body.userId,
+			actorId: body.actorId,
 			actorUsername: body.actorUsername,
 			actorPhoto: body.actorPhoto,
 			type: body.type,
-			postId: new Types.ObjectId(body.postId),
+			postId: body.postId,
 			postPhoto: body.postPhoto,
 			read: false
 		});

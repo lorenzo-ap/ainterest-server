@@ -4,9 +4,7 @@
 	"description": "",
 	"main": "public/server.js",
 	"scripts": {
-		"dev": "tsx watch --env-file=.env src/server.ts ",
-		"build": "tsc",
-		"start": "node --env-file=.env public/server.js",
+		"dev": "tsx watch --env-file=.env api/server.ts ",
 		"check": "biome check",
 		"fix": "biome check --write"
 	},
