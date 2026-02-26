@@ -1,5 +1,6 @@
 import cookie from '@fastify/cookie';
 import fastify from 'fastify';
+import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { cloudinaryPlugin, corsPlugin, dbPlugin, routesPlugin, serializerPlugin } from './plugins';
 
 export const buildApp = async () => {
@@ -7,6 +8,9 @@ export const buildApp = async () => {
 		logger: true,
 		bodyLimit: 1024 * 1024 * 50 // 50MB
 	});
+
+	app.setValidatorCompiler(validatorCompiler);
+	app.setSerializerCompiler(serializerCompiler);
 
 	await app.register(serializerPlugin);
 	await app.register(dbPlugin);

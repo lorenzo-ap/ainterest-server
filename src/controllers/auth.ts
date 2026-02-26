@@ -98,10 +98,10 @@ export const registerUser = async (request: FastifyRequest<RegisterRoute>, reply
 		password: hashedPassword
 	});
 
-	await setAuthTokens(user._id.toString(), reply);
+	await setAuthTokens(user.id, reply);
 
 	return reply.status(201).send({
-		_id: user._id,
+		id: user.id,
 		username: user.username,
 		email: user.email,
 		photo: '',
@@ -127,10 +127,10 @@ export const loginUser = async (request: FastifyRequest<LoginRoute>, reply: Fast
 		return reply.status(400).send({ message: 'Invalid password' });
 	}
 
-	await setAuthTokens(user._id.toString(), reply);
+	await setAuthTokens(user.id, reply);
 
 	return reply.status(200).send({
-		_id: user._id,
+		id: user.id,
 		username: user.username,
 		email: user.email,
 		photo: user.photo,
@@ -192,10 +192,10 @@ export const googleAuth = async (request: FastifyRequest<GoogleAuthRoute>, reply
 			});
 		}
 
-		await setAuthTokens(user._id.toString(), reply);
+		await setAuthTokens(user.id, reply);
 
 		return reply.status(200).send({
-			_id: user._id,
+			id: user.id,
 			username: user.username,
 			email: user.email,
 			photo: user.photo,
@@ -231,7 +231,7 @@ export const refreshToken = async (request: FastifyRequest, reply: FastifyReply)
 		}
 
 		if (storedToken.isExpired()) {
-			await RefreshTokenModel.deleteOne({ _id: storedToken._id });
+			await RefreshTokenModel.deleteOne({ _id: storedToken.id });
 			return reply.status(403).send({ message: 'Refresh token expired' });
 		}
 
@@ -241,7 +241,7 @@ export const refreshToken = async (request: FastifyRequest, reply: FastifyReply)
 			return reply.status(403).send({ message: 'User not found' });
 		}
 
-		const newAccessToken = generateAccessToken(user._id.toString());
+		const newAccessToken = generateAccessToken(user.id);
 
 		reply.setCookie('access-token', newAccessToken, accessTokenCookieOptions);
 
@@ -264,7 +264,7 @@ export const logoutUser = async (request: FastifyRequest, reply: FastifyReply) =
 		if (refreshToken) {
 			await RefreshTokenModel.deleteOne({
 				token: refreshToken,
-				userId: request.user._id
+				userId: request.user.id
 			});
 		}
 
@@ -286,7 +286,7 @@ export const logoutUser = async (request: FastifyRequest, reply: FastifyReply) =
 export const logoutAllDevices = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		await RefreshTokenModel.deleteMany({
-			userId: request.user._id
+			userId: request.user.id
 		});
 
 		reply.clearCookie('access-token', accessTokenCookieOptions);
@@ -316,7 +316,7 @@ export const forgotPassword = async (request: FastifyRequest<ForgotPasswordRoute
 				.send({ message: 'If an account exists with that email, a password reset link has been sent' });
 		}
 
-		const resetToken = generateResetToken(user._id.toString());
+		const resetToken = generateResetToken(user.id);
 
 		const salt = await bcrypt.genSalt(10);
 		const hashedToken = await bcrypt.hash(resetToken, salt);
@@ -370,7 +370,7 @@ export const resetPassword = async (request: FastifyRequest<ResetPasswordRoute>,
 		user.resetPasswordExpires = undefined;
 		await user.save();
 
-		await RefreshTokenModel.deleteMany({ userId: user._id });
+		await RefreshTokenModel.deleteMany({ userId: user.id });
 
 		return reply.status(200).send({ message: 'Password reset successfully' });
 	} catch (error) {

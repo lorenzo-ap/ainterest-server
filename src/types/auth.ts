@@ -1,36 +1,27 @@
-import type { ObjectId } from 'mongoose';
+import type { z } from 'zod';
+import type {
+	forgotPasswordSchema,
+	googleAuthSchema,
+	loginSchema,
+	registerSchema,
+	resetPasswordSchema
+} from '../schemas';
 import type { RouteWithBody } from './http';
 
 export interface RefreshToken {
-	_id: ObjectId;
-	userId: ObjectId;
+	id: string;
+	userId: string;
 	token: string;
 	expiresAt: Date;
 	createdAt: Date;
 	isExpired(): boolean;
 }
 
-export interface LoginBody {
-	email: string;
-	password: string;
-}
-
-export interface RegisterBody extends LoginBody {
-	username: string;
-}
-
-export interface GoogleAuthBody {
-	credential: string;
-}
-
-export interface ForgotPasswordBody {
-	email: string;
-}
-
-export interface ResetPasswordBody {
-	token: string;
-	password: string;
-}
+export type LoginBody = z.infer<typeof loginSchema.body>;
+export type RegisterBody = z.infer<typeof registerSchema.body>;
+export type GoogleAuthBody = z.infer<typeof googleAuthSchema.body>;
+export type ForgotPasswordBody = z.infer<typeof forgotPasswordSchema.body>;
+export type ResetPasswordBody = z.infer<typeof resetPasswordSchema.body>;
 
 export type LoginRoute = RouteWithBody<LoginBody>;
 export type RegisterRoute = RouteWithBody<RegisterBody>;

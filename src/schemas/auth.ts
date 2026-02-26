@@ -1,55 +1,36 @@
+import { z } from 'zod';
 import { PASSWORD_REGEX } from '../constants';
 
 export const loginSchema = {
-	body: {
-		type: 'object',
-		required: ['email', 'password'],
-		properties: {
-			email: { type: 'string', format: 'email' },
-			password: { type: 'string', pattern: PASSWORD_REGEX }
-		}
-	}
-} as const;
+	body: z.object({
+		email: z.email(),
+		password: z.string().regex(PASSWORD_REGEX)
+	})
+};
 
 export const registerSchema = {
-	body: {
-		type: 'object',
-		required: ['username', 'email', 'password'],
-		properties: {
-			username: { type: 'string', minLength: 3, maxLength: 20 },
-			email: { type: 'string', format: 'email' },
-			password: { type: 'string', pattern: PASSWORD_REGEX }
-		}
-	}
-} as const;
+	body: z.object({
+		username: z.string().min(3).max(20),
+		email: z.email(),
+		password: z.string().regex(PASSWORD_REGEX)
+	})
+};
 
 export const googleAuthSchema = {
-	body: {
-		type: 'object',
-		required: ['credential'],
-		properties: {
-			credential: { type: 'string', minLength: 1 }
-		}
-	}
-} as const;
+	body: z.object({
+		credential: z.string().min(1)
+	})
+};
 
 export const forgotPasswordSchema = {
-	body: {
-		type: 'object',
-		required: ['email'],
-		properties: {
-			email: { type: 'string', format: 'email' }
-		}
-	}
-} as const;
+	body: z.object({
+		email: z.email()
+	})
+};
 
 export const resetPasswordSchema = {
-	body: {
-		type: 'object',
-		required: ['token', 'password'],
-		properties: {
-			token: { type: 'string', minLength: 1 },
-			password: { type: 'string', pattern: PASSWORD_REGEX }
-		}
-	}
-} as const;
+	body: z.object({
+		token: z.string().min(1),
+		password: z.string().regex(PASSWORD_REGEX)
+	})
+};

@@ -1,5 +1,4 @@
 import type { FastifyReply } from 'fastify';
-import type { Types } from 'mongoose';
 import { serializeMongo } from '../serializers';
 import type { Notification, SSEConnection, SSEMessage } from '../types';
 
@@ -84,9 +83,8 @@ class SSEConnectionManager {
 		return total;
 	}
 
-	emitNotification(userId: string | Types.ObjectId, notification: Notification): void {
-		const userIdStr = userId.toString();
-		const userConnections = this.connections.get(userIdStr);
+	emitNotification(userId: string, notification: Notification): void {
+		const userConnections = this.connections.get(userId);
 
 		if (userConnections?.size) {
 			const message: SSEMessage = {
@@ -94,7 +92,7 @@ class SSEConnectionManager {
 				payload: notification
 			};
 
-			console.log(`Emitting notification to ${userConnections.size} connection(s) for user ${userIdStr}`);
+			console.log(`Emitting notification to ${userConnections.size} connection(s) for user ${userId}`);
 
 			userConnections.forEach((connection) => {
 				this.sendMessage(connection, message);

@@ -1,24 +1,14 @@
+import { z } from 'zod';
 import { MONGO_ID_REGEX } from '../constants';
 
 export const idParamSchema = {
-	params: {
-		type: 'object',
-		required: ['id'],
-		properties: {
-			id: {
-				type: 'string',
-				pattern: MONGO_ID_REGEX
-			}
-		}
-	}
-} as const;
+	params: z.object({
+		id: z.string().regex(MONGO_ID_REGEX)
+	})
+};
 
 export const usernameParamSchema = {
-	params: {
-		type: 'object',
-		required: ['username'],
-		properties: {
-			username: { type: 'string', minLength: 3, maxLength: 20 }
-		}
-	}
-} as const;
+	params: z.object({
+		username: z.string().min(3).max(20)
+	})
+};

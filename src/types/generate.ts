@@ -1,3 +1,5 @@
+import type { z } from 'zod';
+import type { generateImageSchema } from '../schemas';
 import type { RouteWithBody } from './http';
 
 export interface NSFWResult {
@@ -6,9 +8,6 @@ export interface NSFWResult {
 	sexual_score: number;
 }
 
-export interface GenerateImageBody {
-	text: string;
-	size?: number;
-}
+export type GenerateImageBody = z.infer<typeof generateImageSchema.body>;
 
 export type GenerateImageRoute = RouteWithBody<GenerateImageBody>;

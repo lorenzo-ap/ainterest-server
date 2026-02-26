@@ -1,8 +1,9 @@
-import type { ObjectId } from 'mongoose';
+import type { z } from 'zod';
+import type { editUserSchema } from '../schemas';
 import type { RouteWithBody } from './http';
 
 export interface User {
-	_id: ObjectId;
+	id: string;
 	username: string;
 	email: string;
 	password: string;
@@ -12,10 +13,6 @@ export interface User {
 	resetPasswordExpires?: Date;
 }
 
-export interface EditUserBody {
-	username: string;
-	email: string;
-	photo: string;
-}
+export type EditUserBody = z.infer<typeof editUserSchema.body>;
 
-export type EditUserRoute = RouteWithBody<Partial<EditUserBody>>;
+export type EditUserRoute = RouteWithBody<EditUserBody>;

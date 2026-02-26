@@ -1,10 +1,8 @@
+import { z } from 'zod';
+
 export const generateImageSchema = {
-	body: {
-		type: 'object',
-		required: ['text'],
-		properties: {
-			text: { type: 'string', minLength: 5, maxLength: 200 },
-			size: { type: 'number', enum: [256, 512, 1024] }
-		}
-	}
-} as const;
+	body: z.object({
+		text: z.string().min(5).max(200),
+		size: z.union([z.literal(256), z.literal(512), z.literal(1024)]).optional()
+	})
+};

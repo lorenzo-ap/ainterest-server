@@ -9,10 +9,10 @@ import type { EditUserRoute, UsernameParam } from '../types';
 	@access Private
 **/
 export const currentUser = async (request: FastifyRequest, reply: FastifyReply) => {
-	const { _id, username, email, photo, role } = request.user;
+	const { id, username, email, photo, role } = request.user;
 
 	return reply.status(200).send({
-		_id,
+		id,
 		username,
 		email,
 		photo,
@@ -35,7 +35,7 @@ export const getUserByUsername = async (request: FastifyRequest<UsernameParam>, 
 	}
 
 	return reply.status(200).send({
-		_id: user._id,
+		id: user.id,
 		username: user.username,
 		email: user.email,
 		photo: user.photo,
@@ -51,7 +51,7 @@ export const getUserByUsername = async (request: FastifyRequest<UsernameParam>, 
 export const editUser = async (request: FastifyRequest<EditUserRoute>, reply: FastifyReply) => {
 	const { username, email, photo } = request.body;
 
-	const user = await UserModel.findById(request.user._id);
+	const user = await UserModel.findById(request.user.id);
 
 	if (!user) {
 		return reply.status(400).send({ message: 'User not found' });
@@ -71,7 +71,7 @@ export const editUser = async (request: FastifyRequest<EditUserRoute>, reply: Fa
 	await user.save();
 
 	await PostModel.updateMany(
-		{ 'user._id': user._id },
+		{ 'user._id': user.id },
 		{
 			'user.username': user.username,
 			'user.email': user.email,
@@ -80,7 +80,7 @@ export const editUser = async (request: FastifyRequest<EditUserRoute>, reply: Fa
 	);
 
 	return reply.status(200).send({
-		_id: user._id,
+		id: user.id,
 		username: user.username,
 		email: user.email,
 		photo: user.photo,

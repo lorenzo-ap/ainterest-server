@@ -46,12 +46,12 @@ export const getUserPosts = async (request: FastifyRequest<IdParam>, reply: Fast
 export const createPost = async (request: FastifyRequest<CreatePostRoute>, reply: FastifyReply) => {
 	try {
 		const { prompt, photo } = request.body;
-		const { _id, username, email, photo: userPhoto } = request.user;
+		const { id, username, email, photo: userPhoto } = request.user;
 
 		const cloudinaryPhoto = await cloudinary.uploader.upload(photo);
 		const newPost = await PostModel.create({
 			user: {
-				_id,
+				_id: id,
 				username,
 				email,
 				photo: userPhoto
@@ -82,7 +82,7 @@ export const deletePost = async (request: FastifyRequest<IdParam>, reply: Fastif
 			return reply.status(404).send({ message: 'Post not found' });
 		}
 
-		const isOwner = post.user._id.toString() === request.user._id.toString();
+		const isOwner = post.user.id === request.user.id;
 		if (!isOwner) {
 			return reply.status(403).send({ message: 'Unauthorized to delete this post' });
 		}
@@ -112,20 +112,20 @@ export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyR
 			return reply.status(404).send({ message: 'Post not found' });
 		}
 
-		const isAlreadyLiked = post.likes.includes(request.user._id);
+		const isAlreadyLiked = post.likes.some((like) => String(like) === request.user.id);
 
 		if (!isAlreadyLiked) {
-			post.likes.push(request.user._id);
+			post.likes.push(request.user.id);
 
-			const isOwnPost = post.user._id.toString() === request.user._id.toString();
+			const isOwnPost = post.user.id === request.user.id;
 			if (!isOwnPost) {
 				const body = {
-					userId: post.user._id.toString(),
-					actorId: request.user._id.toString(),
+					userId: post.user.id,
+					actorId: request.user.id,
 					actorUsername: request.user.username,
 					actorPhoto: request.user.photo,
 					type: NotificationType.LIKE,
-					postId: post._id.toString(),
+					postId: post.id,
 					postPhoto: post.photo
 				} satisfies CreateNotificationBody;
 
@@ -134,7 +134,7 @@ export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyR
 				});
 			}
 		} else {
-			post.likes = post.likes.filter((like) => like.toString() !== request.user._id.toString());
+			post.likes = post.likes.filter((like) => String(like) !== request.user.id);
 		}
 
 		await post.save();

@@ -1,26 +1,24 @@
-import type { ObjectId } from 'mongoose';
+import type { z } from 'zod';
+import type { createPostSchema } from '../schemas';
 import type { RouteWithBody } from './http';
 
 export interface PostUser {
-	_id: ObjectId;
+	id: string;
 	username: string;
 	email: string;
 	photo?: string;
 }
 
 export interface Post {
-	_id: ObjectId;
+	id: string;
 	user: PostUser;
 	prompt: string;
 	photo: string;
-	likes: ObjectId[];
+	likes: string[];
 	createdAt: Date;
 	updatedAt: Date;
 }
 
-export interface CreatePostBody {
-	prompt: string;
-	photo: string;
-}
+export type CreatePostBody = z.infer<typeof createPostSchema.body>;
 
 export type CreatePostRoute = RouteWithBody<CreatePostBody>;

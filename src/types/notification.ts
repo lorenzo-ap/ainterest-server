@@ -1,13 +1,11 @@
-import type { ObjectId } from 'mongoose';
-
 export interface Notification {
-	_id: ObjectId;
-	userId: ObjectId;
-	actorId: ObjectId;
+	id: string;
+	userId: string;
+	actorId: string;
 	actorUsername: string;
 	actorPhoto: string;
 	type: NotificationType.LIKE;
-	postId: ObjectId;
+	postId: string;
 	postPhoto: string;
 	read: boolean;
 	createdAt: Date;
