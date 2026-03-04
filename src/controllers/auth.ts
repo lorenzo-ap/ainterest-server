@@ -104,7 +104,7 @@ export const registerUser = async (request: FastifyRequest<RegisterRoute>, reply
 		id: user.id,
 		username: user.username,
 		email: user.email,
-		photo: '',
+		photo: null,
 		role: user.role
 	});
 };
@@ -133,7 +133,7 @@ export const loginUser = async (request: FastifyRequest<LoginRoute>, reply: Fast
 		id: user.id,
 		username: user.username,
 		email: user.email,
-		photo: user.photo,
+		photo: user.photo || null,
 		role: user.role
 	});
 };
@@ -188,7 +188,7 @@ export const googleAuth = async (request: FastifyRequest<GoogleAuthRoute>, reply
 				username,
 				email,
 				password: randomPassword,
-				photo: picture || ''
+				photo: picture
 			});
 		}
 

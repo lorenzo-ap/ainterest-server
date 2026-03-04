@@ -146,7 +146,7 @@ export const createNotification = async (body: CreateNotificationBody): Promise<
 			userId: body.userId,
 			actorId: body.actorId,
 			actorUsername: body.actorUsername,
-			actorPhoto: body.actorPhoto,
+			actorPhoto: body.actorPhoto || null,
 			type: body.type,
 			postId: body.postId,
 			postPhoto: body.postPhoto,

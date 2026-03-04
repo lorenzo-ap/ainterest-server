@@ -54,7 +54,7 @@ export const createPost = async (request: FastifyRequest<CreatePostRoute>, reply
 				_id: id,
 				username,
 				email,
-				photo: userPhoto
+				photo: userPhoto || null
 			},
 			prompt,
 			photo: cloudinaryPhoto.secure_url

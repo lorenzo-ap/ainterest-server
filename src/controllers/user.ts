@@ -38,7 +38,7 @@ export const getUserByUsername = async (request: FastifyRequest<UsernameParam>, 
 		id: user.id,
 		username: user.username,
 		email: user.email,
-		photo: user.photo,
+		photo: user.photo || null,
 		role: user.role
 	});
 };
