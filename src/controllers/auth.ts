@@ -40,19 +40,22 @@ const refreshTokenCookieOptions: CookieSerializeOptions = {
 };
 
 const generateAccessToken = (id: string) => {
-	return jwt.sign({ id }, getEnvString('JWT_ACCESS_SECRET'), {
+	const jwtAccessSecret = getEnvString('JWT_ACCESS_SECRET');
+	return jwt.sign({ id }, jwtAccessSecret, {
 		expiresIn: ACCESS_TOKEN_EXPIRY_JWT
 	});
 };
 
 const generateRefreshToken = (id: string) => {
-	return jwt.sign({ id }, getEnvString('JWT_REFRESH_SECRET'), {
+	const jwtRefreshSecret = getEnvString('JWT_REFRESH_SECRET');
+	return jwt.sign({ id }, jwtRefreshSecret, {
 		expiresIn: REFRESH_TOKEN_EXPIRY_JWT
 	});
 };
 
 const generateResetToken = (id: string) => {
-	return jwt.sign({ id }, getEnvString('JWT_RESET_SECRET'), {
+	const jwtResetSecret = getEnvString('JWT_RESET_SECRET');
+	return jwt.sign({ id }, jwtResetSecret, {
 		expiresIn: RESET_TOKEN_EXPIRY_JWT
 	});
 };
@@ -145,18 +148,14 @@ export const loginUser = async (request: FastifyRequest<LoginRoute>, reply: Fast
 **/
 export const googleAuth = async (request: FastifyRequest<GoogleAuthRoute>, reply: FastifyReply) => {
 	const { credential } = request.body;
-
-	if (!process.env.GOOGLE_CLIENT_ID) {
-		request.log.error('GOOGLE_CLIENT_ID environment variable is not set');
-		return reply.status(500).send({ message: 'Google authentication is not configured' });
-	}
+	const googleClientId = getEnvString('GOOGLE_CLIENT_ID');
 
 	try {
-		const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+		const client = new OAuth2Client(googleClientId);
 
 		const ticket = await client.verifyIdToken({
 			idToken: credential,
-			audience: process.env.GOOGLE_CLIENT_ID
+			audience: googleClientId
 		});
 
 		const payload = ticket.getPayload();
@@ -219,7 +218,8 @@ export const refreshToken = async (request: FastifyRequest, reply: FastifyReply)
 	}
 
 	try {
-		const decoded = jwt.verify(refreshToken, getEnvString('JWT_REFRESH_SECRET')) as jwt.JwtPayload;
+		const jwtRefreshSecret = getEnvString('JWT_REFRESH_SECRET');
+		const decoded = jwt.verify(refreshToken, jwtRefreshSecret) as jwt.JwtPayload;
 
 		const storedToken = await RefreshTokenModel.findOne({
 			token: refreshToken,
@@ -345,7 +345,8 @@ export const resetPassword = async (request: FastifyRequest<ResetPasswordRoute>,
 	const { token, password } = request.body;
 
 	try {
-		const decoded = jwt.verify(token, getEnvString('JWT_RESET_SECRET')) as jwt.JwtPayload;
+		const jwtResetSecret = getEnvString('JWT_RESET_SECRET');
+		const decoded = jwt.verify(token, jwtResetSecret) as jwt.JwtPayload;
 
 		const user = await UserModel.findOne({
 			_id: decoded.id,

@@ -11,7 +11,8 @@ export const protect = async (request: FastifyRequest, reply: FastifyReply) => {
 	}
 
 	try {
-		const decoded = jwt.verify(accessToken, getEnvString('JWT_ACCESS_SECRET')) as jwt.JwtPayload;
+		const jwtAccessSecret = getEnvString('JWT_ACCESS_SECRET');
+		const decoded = jwt.verify(accessToken, jwtAccessSecret) as jwt.JwtPayload;
 		const user = await UserModel.findById(decoded.id).select('-password');
 
 		if (!user) {

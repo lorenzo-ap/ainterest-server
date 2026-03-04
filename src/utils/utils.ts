@@ -1,6 +1,8 @@
 export const getRapidAPIHeaders = (host: string): Record<string, string> => {
+	const rapidApiKey = getEnvString('RAPIDAPI_KEY');
+
 	return {
-		'x-rapidapi-key': getEnvString('RAPIDAPI_KEY'),
+		'x-rapidapi-key': rapidApiKey,
 		'x-rapidapi-host': host,
 		'Content-Type': 'application/json'
 	};

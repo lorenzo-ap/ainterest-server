@@ -1,12 +1,9 @@
 import fastifyPlugin from 'fastify-plugin';
 import mongoose from 'mongoose';
+import { getEnvString } from '../utils/utils';
 
 export const dbPlugin = fastifyPlugin(async (app) => {
-	const mongodbURL = process.env.MONGODB_URL;
-
-	if (!mongodbURL) {
-		throw new Error('MONGODB_URL is not defined');
-	}
+	const mongodbURL = getEnvString('MONGODB_URL');
 
 	mongoose.set('strictQuery', true);
 	await mongoose.connect(mongodbURL);

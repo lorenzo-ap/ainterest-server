@@ -2,6 +2,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { NotificationModel } from '../models';
 import { sseManager } from '../services';
 import type { CreateNotificationBody, IdParam } from '../types';
+import { getEnvString } from '../utils/utils';
 
 /**
  * @desc Get user's notifications
@@ -129,7 +130,7 @@ export const streamNotifications = async (request: FastifyRequest, reply: Fastif
 	try {
 		const userId = request.user.id;
 
-		const frontendUrl = process.env.FRONTEND_URL;
+		const frontendUrl = getEnvString('FRONTEND_URL');
 		sseManager.addConnection(userId, reply, frontendUrl);
 	} catch (error) {
 		request.log.error(error);

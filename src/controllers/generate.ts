@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { GenerateImageRoute, NSFWResult } from '../types';
-import { getEnvNumber, getRapidAPIHeaders } from '../utils/utils';
+import { getEnvNumber, getEnvString, getRapidAPIHeaders } from '../utils/utils';
 
 const translateTextHelper = async (text: string): Promise<string> => {
 	const host = 'ai-translate.p.rapidapi.com';
@@ -49,12 +49,15 @@ const generateImageHelper = async (prompt: string, size: number = 512): Promise<
 		num_steps: getEnvNumber('IMAGE_GENERATOR_NUM_STEPS')
 	};
 
+	const cloudflareAccountId = getEnvString('CLOUDFLARE_ACCOUNT_ID');
+	const cloudflareApiToken = getEnvString('CLOUDFLARE_API_TOKEN');
+
 	const response = await fetch(
-		`https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/stabilityai/stable-diffusion-xl-base-1.0`,
+		`https://api.cloudflare.com/client/v4/accounts/${cloudflareAccountId}/ai/run/@cf/stabilityai/stable-diffusion-xl-base-1.0`,
 		{
 			method: 'POST',
 			headers: {
-				Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+				Authorization: `Bearer ${cloudflareApiToken}`,
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify(body)
