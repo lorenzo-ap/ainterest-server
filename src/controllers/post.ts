@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { NotificationModel, PostModel } from '../models';
-import { type CreateNotificationBody, type CreatePostRoute, type IdParam, NotificationType } from '../types';
+import { type CreateNotificationBody, type CreatePostRoute, type IdParam, NotificationType, UserRole } from '../types';
 import { createNotification } from './notification';
 
 /**
@@ -83,7 +83,9 @@ export const deletePost = async (request: FastifyRequest<IdParam>, reply: Fastif
 		}
 
 		const isOwner = post.user.id === request.user.id;
-		if (!isOwner) {
+		const isAdmin = request.user.role === UserRole.Admin;
+
+		if (!isOwner && !isAdmin) {
 			return reply.status(403).send({ message: 'Unauthorized to delete this post' });
 		}
 

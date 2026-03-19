@@ -2,13 +2,18 @@ import type { z } from 'zod';
 import type { editUserSchema } from '../schemas';
 import type { RouteWithBody } from './http';
 
+export enum UserRole {
+	User = 'user',
+	Admin = 'admin'
+}
+
 export interface User {
 	id: string;
 	username: string;
 	email: string;
 	password: string;
 	photo: string;
-	role: 'user' | 'admin';
+	role: UserRole;
 	resetPasswordToken?: string;
 	resetPasswordExpires?: Date;
 }
