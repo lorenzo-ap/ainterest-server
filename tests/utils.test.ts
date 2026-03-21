@@ -1,13 +1,22 @@
 import { Types } from 'mongoose';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { serializeMongo } from '../src/serializers/mongo';
 import { getEnvNumber, getEnvString, isObjectLike } from '../src/utils/utils';
 
 describe('getEnvString', () => {
+	let originalEnv: NodeJS.ProcessEnv;
+
+	beforeEach(() => {
+		originalEnv = { ...process.env };
+	});
+
+	afterEach(() => {
+		process.env = originalEnv;
+	});
+
 	it('should return the value of an existing env variable', () => {
 		process.env.TEST_STRING_VAR = 'hello';
 		expect(getEnvString('TEST_STRING_VAR')).toBe('hello');
-		delete process.env.TEST_STRING_VAR;
 	});
 
 	it('should throw when the env variable is not set', () => {
@@ -17,10 +26,19 @@ describe('getEnvString', () => {
 });
 
 describe('getEnvNumber', () => {
+	let originalEnv: NodeJS.ProcessEnv;
+
+	beforeEach(() => {
+		originalEnv = { ...process.env };
+	});
+
+	afterEach(() => {
+		process.env = originalEnv;
+	});
+
 	it('should return the numeric value of an existing env variable', () => {
 		process.env.TEST_NUM_VAR = '42';
 		expect(getEnvNumber('TEST_NUM_VAR')).toBe(42);
-		delete process.env.TEST_NUM_VAR;
 	});
 
 	it('should throw when the env variable is not set', () => {
@@ -31,7 +49,6 @@ describe('getEnvNumber', () => {
 	it('should throw when the env variable is not a valid number', () => {
 		process.env.BAD_NUM_VAR = 'not-a-number';
 		expect(() => getEnvNumber('BAD_NUM_VAR')).toThrow('Invalid number in env var: BAD_NUM_VAR');
-		delete process.env.BAD_NUM_VAR;
 	});
 });
 
