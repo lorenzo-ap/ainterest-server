@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import type { CookieSerializeOptions } from '@fastify/cookie';
 import bcrypt from 'bcryptjs';
 import type { FastifyReply, FastifyRequest } from 'fastify';
@@ -48,7 +49,7 @@ const generateAccessToken = (id: string) => {
 
 const generateRefreshToken = (id: string) => {
 	const jwtRefreshSecret = getEnvString('JWT_REFRESH_SECRET');
-	return jwt.sign({ id }, jwtRefreshSecret, {
+	return jwt.sign({ id, jti: randomBytes(16).toString('hex') }, jwtRefreshSecret, {
 		expiresIn: REFRESH_TOKEN_EXPIRY_JWT
 	});
 };

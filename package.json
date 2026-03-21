@@ -6,7 +6,9 @@
 	"scripts": {
 		"dev": "tsx watch --env-file=.env api/server.ts ",
 		"check": "biome check",
-		"fix": "biome check --write"
+		"fix": "biome check --write",
+		"test": "vitest run",
+		"test:coverage": "vitest run --coverage"
 	},
 	"keywords": [],
 	"author": "",
@@ -29,9 +31,13 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.14",
+		"@testcontainers/mongodb": "^11.13.0",
 		"@types/node": "^24.10.11",
+		"@vitest/coverage-v8": "^4.1.0",
 		"lefthook": "^2.1.0",
+		"mongodb-memory-server": "^11.0.1",
 		"tsx": "^4.21.0",
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.0"
 	}
 }
