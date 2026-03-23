@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { PostModel, UserModel } from '../models';
+import { UserModel } from '../models';
 import type { EditUserRoute, UsernameParam } from '../types';
 
 /**
@@ -69,15 +69,6 @@ export const editUser = async (request: FastifyRequest<EditUserRoute>, reply: Fa
 	}
 
 	await user.save();
-
-	await PostModel.updateMany(
-		{ 'user._id': user.id },
-		{
-			'user.username': user.username,
-			'user.email': user.email,
-			'user.photo': user.photo
-		}
-	);
 
 	return reply.status(200).send({
 		id: user.id,

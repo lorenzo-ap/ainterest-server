@@ -4,23 +4,8 @@ import type { Post } from '../types';
 const postSchema = new Schema(
 	{
 		user: {
-			type: {
-				_id: {
-					type: Schema.Types.ObjectId,
-					required: true
-				},
-				username: {
-					type: String,
-					required: true
-				},
-				email: {
-					type: String,
-					required: true
-				},
-				photo: {
-					type: String
-				}
-			},
+			type: Schema.Types.ObjectId,
+			ref: 'User',
 			required: true
 		},
 		prompt: {

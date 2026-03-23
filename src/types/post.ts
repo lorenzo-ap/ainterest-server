@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 import type { createPostSchema } from '../schemas';
+import type { Ref } from './common';
 import type { RouteWithBody } from './http';
 
 export interface PostUser {
@@ -11,7 +12,7 @@ export interface PostUser {
 
 export interface Post {
 	id: string;
-	user: PostUser;
+	user: Ref<PostUser>;
 	prompt: string;
 	photo: string;
 	likes: string[];

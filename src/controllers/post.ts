@@ -4,6 +4,8 @@ import { NotificationModel, PostModel } from '../models';
 import { type CreateNotificationBody, type CreatePostRoute, type IdParam, NotificationType, UserRole } from '../types';
 import { createNotification } from './notification';
 
+const POST_USER_PROJECTION = 'username email photo';
+
 /**
 	@desc Get all posts
 	@route GET /api/v1/posts
@@ -11,7 +13,7 @@ import { createNotification } from './notification';
 **/
 export const getPosts = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const posts = await PostModel.find({});
+		const posts = await PostModel.find({}).populate('user', POST_USER_PROJECTION);
 
 		return reply.status(200).send(posts);
 	} catch (error) {
@@ -29,7 +31,7 @@ export const getUserPosts = async (request: FastifyRequest<IdParam>, reply: Fast
 	try {
 		const { id } = request.params;
 
-		const posts = await PostModel.find({ 'user._id': id });
+		const posts = await PostModel.find({ user: id }).populate('user', POST_USER_PROJECTION);
 
 		return reply.status(200).send(posts);
 	} catch (error) {
@@ -46,19 +48,16 @@ export const getUserPosts = async (request: FastifyRequest<IdParam>, reply: Fast
 export const createPost = async (request: FastifyRequest<CreatePostRoute>, reply: FastifyReply) => {
 	try {
 		const { prompt, photo } = request.body;
-		const { id, username, email, photo: userPhoto } = request.user;
+		const { id } = request.user;
 
 		const cloudinaryPhoto = await cloudinary.uploader.upload(photo);
 		const newPost = await PostModel.create({
-			user: {
-				_id: id,
-				username,
-				email,
-				photo: userPhoto || null
-			},
+			user: id,
 			prompt,
 			photo: cloudinaryPhoto.secure_url
 		});
+
+		await newPost.populate('user', POST_USER_PROJECTION);
 
 		return reply.status(201).send(newPost);
 	} catch (error) {
@@ -82,7 +81,7 @@ export const deletePost = async (request: FastifyRequest<IdParam>, reply: Fastif
 			return reply.status(404).send({ message: 'Post not found' });
 		}
 
-		const isOwner = post.user.id === request.user.id;
+		const isOwner = String(post.user) === request.user.id;
 		const isAdmin = request.user.role === UserRole.Admin;
 
 		if (!isOwner && !isAdmin) {
@@ -119,10 +118,12 @@ export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyR
 		if (!isAlreadyLiked) {
 			post.likes.push(request.user.id);
 
-			const isOwnPost = post.user.id === request.user.id;
+			const postUserId = String(post.user);
+			const isOwnPost = postUserId === request.user.id;
+
 			if (!isOwnPost) {
 				const notificationBody = {
-					userId: post.user.id,
+					userId: postUserId,
 					type: NotificationType.LIKE,
 					actor: {
 						id: request.user.id,
@@ -144,6 +145,7 @@ export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyR
 		}
 
 		await post.save();
+		await post.populate('user', POST_USER_PROJECTION);
 
 		return reply.status(200).send(post);
 	} catch (error) {
