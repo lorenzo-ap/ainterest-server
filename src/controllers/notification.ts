@@ -143,18 +143,8 @@ export const streamNotifications = async (request: FastifyRequest, reply: Fastif
  */
 export const createNotification = async (body: CreateNotificationBody): Promise<void> => {
 	try {
-		const notification = await NotificationModel.create({
-			userId: body.userId,
-			actorId: body.actorId,
-			actorUsername: body.actorUsername,
-			actorPhoto: body.actorPhoto || null,
-			type: body.type,
-			postId: body.postId,
-			postPhoto: body.postPhoto,
-			read: false
-		});
-
-		sseManager.emitNotification(body.userId, notification);
+		const notification = await NotificationModel.create(body);
+		sseManager.emitNotification(notification);
 	} catch (error) {
 		console.error('Error creating notification:', error);
 	}

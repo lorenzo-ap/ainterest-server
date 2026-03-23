@@ -121,17 +121,21 @@ export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyR
 
 			const isOwnPost = post.user.id === request.user.id;
 			if (!isOwnPost) {
-				const body = {
+				const notificationBody = {
 					userId: post.user.id,
-					actorId: request.user.id,
-					actorUsername: request.user.username,
-					actorPhoto: request.user.photo,
 					type: NotificationType.LIKE,
-					postId: post.id,
-					postPhoto: post.photo
+					actor: {
+						id: request.user.id,
+						username: request.user.username,
+						photo: request.user.photo || null
+					},
+					post: {
+						id: post.id,
+						photo: post.photo
+					}
 				} satisfies CreateNotificationBody;
 
-				createNotification(body).catch((error) => {
+				createNotification(notificationBody).catch((error) => {
 					request.log.error('Failed to create notification:', error);
 				});
 			}

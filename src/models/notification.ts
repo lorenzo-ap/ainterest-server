@@ -9,36 +9,48 @@ const notificationSchema = new Schema(
 			required: true,
 			index: true
 		},
-		actorId: {
-			type: Schema.Types.ObjectId,
-			ref: 'User',
-			required: true
-		},
-		actorUsername: {
-			type: String,
-			required: true
-		},
-		actorPhoto: {
-			type: String,
-			default: ''
-		},
 		type: {
 			type: String,
 			enum: ['LIKE'],
 			required: true
 		},
-		postId: {
-			type: Schema.Types.ObjectId,
-			ref: 'Post',
-			required: true
-		},
-		postPhoto: {
-			type: String,
-			required: true
-		},
 		read: {
 			type: Boolean,
 			default: false
+		},
+		actor: {
+			type: {
+				id: {
+					type: Schema.Types.ObjectId,
+					ref: 'User',
+					required: true
+				},
+				username: {
+					type: String,
+					required: true
+				},
+				photo: {
+					type: String,
+					default: ''
+				}
+			},
+			required: true,
+			_id: false
+		},
+		post: {
+			type: {
+				id: {
+					type: Schema.Types.ObjectId,
+					ref: 'Post',
+					required: true
+				},
+				photo: {
+					type: String,
+					required: true
+				}
+			},
+			required: true,
+			_id: false
 		}
 	},
 	{

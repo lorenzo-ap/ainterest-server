@@ -83,8 +83,8 @@ class SSEConnectionManager {
 		return total;
 	}
 
-	emitNotification(userId: string, notification: Notification): void {
-		const userConnections = this.connections.get(userId);
+	emitNotification(notification: Notification): void {
+		const userConnections = this.connections.get(String(notification.userId));
 
 		if (userConnections?.size) {
 			const message: SSEMessage = {
@@ -92,7 +92,7 @@ class SSEConnectionManager {
 				payload: notification
 			};
 
-			console.log(`Emitting notification to ${userConnections.size} connection(s) for user ${userId}`);
+			console.log(`Emitting notification to ${userConnections.size} connection(s) for user ${notification.userId}`);
 
 			userConnections.forEach((connection) => {
 				this.sendMessage(connection, message);
