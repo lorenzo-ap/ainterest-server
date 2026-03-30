@@ -19,23 +19,9 @@ const notificationSchema = new Schema(
 			default: false
 		},
 		actor: {
-			type: {
-				id: {
-					type: Schema.Types.ObjectId,
-					ref: 'User',
-					required: true
-				},
-				username: {
-					type: String,
-					required: true
-				},
-				photo: {
-					type: String,
-					default: ''
-				}
-			},
-			required: true,
-			_id: false
+			type: Schema.Types.ObjectId,
+			ref: 'User',
+			required: true
 		},
 		post: {
 			type: {

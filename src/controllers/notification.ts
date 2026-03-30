@@ -4,6 +4,8 @@ import { sseManager } from '../services';
 import type { CreateNotificationBody, IdParam } from '../types';
 import { getEnvString } from '../utils/utils';
 
+const NOTIFICATION_USER_PROJECTION = 'username photo';
+
 /**
  * @desc Get user's notifications
  * @route GET /api/v1/notifications
@@ -13,7 +15,10 @@ export const getNotifications = async (request: FastifyRequest, reply: FastifyRe
 	try {
 		const userId = request.user.id;
 
-		const notifications = await NotificationModel.find({ userId }).sort({ createdAt: -1 }).limit(50);
+		const notifications = await NotificationModel.find({ userId })
+			.populate('actor', NOTIFICATION_USER_PROJECTION)
+			.sort({ createdAt: -1 })
+			.limit(50);
 
 		return reply.status(200).send(notifications);
 	} catch (error) {
@@ -144,6 +149,8 @@ export const streamNotifications = async (request: FastifyRequest, reply: Fastif
 export const createNotification = async (body: CreateNotificationBody): Promise<void> => {
 	try {
 		const notification = await NotificationModel.create(body);
+		await notification.populate('actor', NOTIFICATION_USER_PROJECTION);
+
 		sseManager.emitNotification(notification);
 	} catch (error) {
 		console.error('Error creating notification:', error);

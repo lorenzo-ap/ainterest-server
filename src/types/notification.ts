@@ -27,6 +27,6 @@ export interface NotificationPost {
 export interface CreateNotificationBody {
 	userId: string;
 	type: NotificationType;
-	actor: NotificationActor;
+	actor: string;
 	post: NotificationPost;
 }

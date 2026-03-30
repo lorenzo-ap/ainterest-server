@@ -125,11 +125,7 @@ export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyR
 				const notificationBody = {
 					userId: postUserId,
 					type: NotificationType.LIKE,
-					actor: {
-						id: request.user.id,
-						username: request.user.username,
-						photo: request.user.photo || null
-					},
+					actor: request.user.id,
 					post: {
 						id: post.id,
 						photo: post.photo
