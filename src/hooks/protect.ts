@@ -3,6 +3,13 @@ import jwt from 'jsonwebtoken';
 import { UserModel } from '../models';
 import { getEnvString } from '../utils/utils';
 
+const getUserFromAccessToken = async (accessToken: string) => {
+	const jwtAccessSecret = getEnvString('JWT_ACCESS_SECRET');
+	const decoded = jwt.verify(accessToken, jwtAccessSecret) as jwt.JwtPayload;
+
+	return UserModel.findById(decoded.id).select('-password');
+};
+
 export const protect = async (request: FastifyRequest, reply: FastifyReply) => {
 	const accessToken = request.cookies['access-token'];
 
@@ -11,9 +18,7 @@ export const protect = async (request: FastifyRequest, reply: FastifyReply) => {
 	}
 
 	try {
-		const jwtAccessSecret = getEnvString('JWT_ACCESS_SECRET');
-		const decoded = jwt.verify(accessToken, jwtAccessSecret) as jwt.JwtPayload;
-		const user = await UserModel.findById(decoded.id).select('-password');
+		const user = await getUserFromAccessToken(accessToken);
 
 		if (!user) {
 			return reply.status(401).send({ message: 'Not authorized, user not found' });
@@ -32,5 +37,23 @@ export const protect = async (request: FastifyRequest, reply: FastifyReply) => {
 		}
 
 		return reply.status(401).send({ message: 'Not authorized' });
+	}
+};
+
+export const optionalProtect = async (request: FastifyRequest) => {
+	const accessToken = request.cookies['access-token'];
+
+	if (!accessToken) {
+		return;
+	}
+
+	try {
+		const user = await getUserFromAccessToken(accessToken);
+
+		if (user) {
+			request.user = user;
+		}
+	} catch {
+		// Continue as guest when token is invalid or expired.
 	}
 };

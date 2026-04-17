@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { NotificationModel, PostModel } from '../models';
+import { toPostResponse } from '../serializers';
 import { type CreateNotificationBody, type CreatePostRoute, type IdParam, NotificationType, UserRole } from '../types';
 import { createNotification } from './notification';
 
@@ -14,8 +15,9 @@ const POST_USER_PROJECTION = 'username email photo';
 export const getPosts = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const posts = await PostModel.find({}).populate('user', POST_USER_PROJECTION);
+		const postsWithViewerState = posts.map((post) => toPostResponse(post, request.user?.id));
 
-		return reply.status(200).send(posts);
+		return reply.status(200).send(postsWithViewerState);
 	} catch (error) {
 		request.log.error(error);
 		return reply.status(500).send(error);
@@ -32,8 +34,9 @@ export const getUserPosts = async (request: FastifyRequest<IdParam>, reply: Fast
 		const { id } = request.params;
 
 		const posts = await PostModel.find({ user: id }).populate('user', POST_USER_PROJECTION);
+		const postsWithViewerState = posts.map((post) => toPostResponse(post, request.user?.id));
 
-		return reply.status(200).send(posts);
+		return reply.status(200).send(postsWithViewerState);
 	} catch (error) {
 		request.log.error(error);
 		return reply.status(500).send(error);
@@ -58,8 +61,9 @@ export const createPost = async (request: FastifyRequest<CreatePostRoute>, reply
 		});
 
 		await newPost.populate('user', POST_USER_PROJECTION);
+		const newPostResponse = toPostResponse(newPost, request.user.id);
 
-		return reply.status(201).send(newPost);
+		return reply.status(201).send(newPostResponse);
 	} catch (error) {
 		request.log.error(error);
 		return reply.status(500).send(error);
@@ -73,6 +77,8 @@ export const createPost = async (request: FastifyRequest<CreatePostRoute>, reply
 **/
 export const deletePost = async (request: FastifyRequest<IdParam>, reply: FastifyReply) => {
 	try {
+		const currentUserId = request.user.id;
+
 		const { id } = request.params;
 
 		const post = await PostModel.findById(id);
@@ -81,7 +87,7 @@ export const deletePost = async (request: FastifyRequest<IdParam>, reply: Fastif
 			return reply.status(404).send({ message: 'Post not found' });
 		}
 
-		const isOwner = String(post.user) === request.user.id;
+		const isOwner = String(post.user) === currentUserId;
 		const isAdmin = request.user.role === UserRole.Admin;
 
 		if (!isOwner && !isAdmin) {
@@ -105,6 +111,8 @@ export const deletePost = async (request: FastifyRequest<IdParam>, reply: Fastif
 **/
 export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyReply) => {
 	try {
+		const currentUserId = request.user.id;
+
 		const { id } = request.params;
 
 		const post = await PostModel.findById(id);
@@ -113,19 +121,19 @@ export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyR
 			return reply.status(404).send({ message: 'Post not found' });
 		}
 
-		const isAlreadyLiked = post.likes.some((like) => String(like) === request.user.id);
+		const isAlreadyLiked = post.likes.some((like) => String(like) === currentUserId);
 
 		if (!isAlreadyLiked) {
-			post.likes.push(request.user.id);
+			post.likes.push(currentUserId);
 
 			const postUserId = String(post.user);
-			const isOwnPost = postUserId === request.user.id;
+			const isOwnPost = postUserId === currentUserId;
 
 			if (!isOwnPost) {
 				const notificationBody = {
 					userId: postUserId,
 					type: NotificationType.LIKE,
-					actor: request.user.id,
+					actor: currentUserId,
 					post: {
 						id: post.id,
 						photo: post.photo
@@ -137,13 +145,14 @@ export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyR
 				});
 			}
 		} else {
-			post.likes = post.likes.filter((like) => String(like) !== request.user.id);
+			post.likes = post.likes.filter((like) => String(like) !== currentUserId);
 		}
 
 		await post.save();
 		await post.populate('user', POST_USER_PROJECTION);
+		const postResponse = toPostResponse(post, currentUserId);
 
-		return reply.status(200).send(post);
+		return reply.status(200).send(postResponse);
 	} catch (error) {
 		request.log.error(error);
 		return reply.status(500).send(error);
