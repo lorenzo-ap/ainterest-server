@@ -122,12 +122,12 @@ export const loginUser = async (request: FastifyRequest<LoginRoute>, reply: Fast
 
 	const user = await UserModel.findOne({ email });
 	if (!user) {
-		return reply.status(400).send({ message: 'Invalid email' });
+		return reply.status(400).send({ message: 'Invalid credentials' });
 	}
 
 	const rightPassword = await bcrypt.compare(password, user.password);
 	if (!rightPassword) {
-		return reply.status(400).send({ message: 'Invalid password' });
+		return reply.status(400).send({ message: 'Invalid credentials' });
 	}
 
 	await setAuthTokens(user.id, reply);
@@ -212,17 +212,17 @@ export const googleAuth = async (request: FastifyRequest<GoogleAuthRoute>, reply
 	@access Public
 **/
 export const refreshToken = async (request: FastifyRequest, reply: FastifyReply) => {
-	const refreshToken = request.cookies['refresh-token'];
-	if (!refreshToken) {
+	const incomingRefreshToken = request.cookies['refresh-token'];
+	if (!incomingRefreshToken) {
 		return reply.status(401).send({ message: 'Refresh token required' });
 	}
 
 	try {
 		const jwtRefreshSecret = getEnvString('JWT_REFRESH_SECRET');
-		const decoded = jwt.verify(refreshToken, jwtRefreshSecret) as jwt.JwtPayload;
+		const decoded = jwt.verify(incomingRefreshToken, jwtRefreshSecret) as jwt.JwtPayload;
 
 		const storedToken = await RefreshTokenModel.findOne({
-			token: refreshToken,
+			token: incomingRefreshToken,
 			userId: decoded.id
 		});
 
@@ -242,8 +242,14 @@ export const refreshToken = async (request: FastifyRequest, reply: FastifyReply)
 		}
 
 		const newAccessToken = generateAccessToken(user.id);
+		const newRefreshToken = generateRefreshToken(user.id);
+
+		storedToken.token = newRefreshToken;
+		storedToken.expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
+		await storedToken.save();
 
 		reply.setCookie('access-token', newAccessToken, accessTokenCookieOptions);
+		reply.setCookie('refresh-token', newRefreshToken, refreshTokenCookieOptions);
 
 		return reply.status(200).send({ message: 'Access token refreshed' });
 	} catch (error) {

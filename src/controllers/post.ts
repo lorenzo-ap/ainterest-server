@@ -20,7 +20,7 @@ export const getPosts = async (request: FastifyRequest, reply: FastifyReply) => 
 		return reply.status(200).send(postsWithViewerState);
 	} catch (error) {
 		request.log.error(error);
-		return reply.status(500).send(error);
+		return reply.status(500).send({ message: 'Error fetching posts' });
 	}
 };
 
@@ -39,7 +39,7 @@ export const getUserPosts = async (request: FastifyRequest<IdParam>, reply: Fast
 		return reply.status(200).send(postsWithViewerState);
 	} catch (error) {
 		request.log.error(error);
-		return reply.status(500).send(error);
+		return reply.status(500).send({ message: 'Error fetching user posts' });
 	}
 };
 
@@ -66,7 +66,7 @@ export const createPost = async (request: FastifyRequest<CreatePostRoute>, reply
 		return reply.status(201).send(newPostResponse);
 	} catch (error) {
 		request.log.error(error);
-		return reply.status(500).send(error);
+		return reply.status(500).send({ message: 'Error creating post' });
 	}
 };
 
@@ -95,12 +95,12 @@ export const deletePost = async (request: FastifyRequest<IdParam>, reply: Fastif
 		}
 
 		await PostModel.findByIdAndDelete(id);
-		await NotificationModel.deleteMany({ postId: id });
+		await NotificationModel.deleteMany({ 'post.id': id });
 
 		return reply.status(200).send({ message: 'Post deleted' });
 	} catch (error) {
 		request.log.error(error);
-		return reply.status(500).send(error);
+		return reply.status(500).send({ message: 'Error deleting post' });
 	}
 };
 
@@ -155,6 +155,6 @@ export const likePost = async (request: FastifyRequest<IdParam>, reply: FastifyR
 		return reply.status(200).send(postResponse);
 	} catch (error) {
 		request.log.error(error);
-		return reply.status(500).send(error);
+		return reply.status(500).send({ message: 'Error updating post reaction' });
 	}
 };
