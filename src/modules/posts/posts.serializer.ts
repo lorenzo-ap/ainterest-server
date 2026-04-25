@@ -1,0 +1,1 @@
+export { toPostResponse } from '../../serializers';

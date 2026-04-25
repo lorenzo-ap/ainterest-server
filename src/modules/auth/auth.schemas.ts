@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PASSWORD_REGEX } from '../constants';
+import { PASSWORD_REGEX } from '../../constants';
 
 export const loginSchema = {
 	body: z.object({

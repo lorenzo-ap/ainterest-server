@@ -1,5 +1,5 @@
 import fastifyPlugin from 'fastify-plugin';
-import { authRoutes, generateRoutes, notificationRoutes, postRoutes, userRoutes } from '../routes';
+import { authRoutes, generateRoutes, notificationRoutes, postRoutes, userRoutes } from '../modules';
 
 export const routesPlugin = fastifyPlugin((app) => {
 	app.register(authRoutes, { prefix: '/api/v1/auth' });

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BASE64_IMAGE_DATA_URL_REGEX } from '../constants';
+import { BASE64_IMAGE_DATA_URL_REGEX } from '../../constants';
 
 export const createPostSchema = {
 	body: z.object({

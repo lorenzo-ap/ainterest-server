@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify';
+import { protect } from '../../hooks';
 import {
 	forgotPassword,
 	googleAuth,
@@ -8,10 +9,15 @@ import {
 	refreshToken,
 	registerUser,
 	resetPassword
-} from '../controllers/auth';
-import { protect } from '../hooks';
-import { forgotPasswordSchema, googleAuthSchema, loginSchema, registerSchema, resetPasswordSchema } from '../schemas';
-import type { ForgotPasswordRoute, GoogleAuthRoute, LoginRoute, RegisterRoute, ResetPasswordRoute } from '../types';
+} from './auth.controller';
+import {
+	forgotPasswordSchema,
+	googleAuthSchema,
+	loginSchema,
+	registerSchema,
+	resetPasswordSchema
+} from './auth.schemas';
+import type { ForgotPasswordRoute, GoogleAuthRoute, LoginRoute, RegisterRoute, ResetPasswordRoute } from './auth.types';
 
 export async function authRoutes(server: FastifyInstance) {
 	server.post<LoginRoute>('/login', { schema: loginSchema }, loginUser);

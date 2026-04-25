@@ -1,4 +1,7 @@
 import type { FastifyInstance } from 'fastify';
+import { protect } from '../../hooks';
+import { idParamSchema } from '../../schemas';
+import type { IdParam } from '../../types';
 import {
 	deleteAllNotifications,
 	deleteNotification,
@@ -7,10 +10,7 @@ import {
 	markAllNotificationsAsRead,
 	markNotificationAsRead,
 	streamNotifications
-} from '../controllers';
-import { protect } from '../hooks';
-import { idParamSchema } from '../schemas';
-import type { IdParam } from '../types';
+} from './notifications.controller';
 
 export async function notificationRoutes(server: FastifyInstance) {
 	server.get('/', { preHandler: protect }, getNotifications);

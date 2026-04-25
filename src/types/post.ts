@@ -1,7 +1,4 @@
-import type { z } from 'zod';
-import type { createPostSchema } from '../schemas';
 import type { Ref } from './common';
-import type { RouteWithBody } from './http';
 
 export interface PostUser {
 	id: string;
@@ -19,7 +16,3 @@ export interface Post {
 	createdAt: Date;
 	updatedAt: Date;
 }
-
-export type CreatePostBody = z.infer<typeof createPostSchema.body>;
-
-export type CreatePostRoute = RouteWithBody<CreatePostBody>;

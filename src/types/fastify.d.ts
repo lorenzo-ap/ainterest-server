@@ -1,4 +1,4 @@
-import type { User } from '../models';
+import type { User } from './user';
 
 declare module 'fastify' {
 	interface FastifyRequest {

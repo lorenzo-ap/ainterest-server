@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
-import { UserModel } from '../models';
+import { UserModel } from '../modules/users/user.model';
 import { getEnvString } from '../utils/utils';
 
 const getUserFromAccessToken = async (accessToken: string) => {

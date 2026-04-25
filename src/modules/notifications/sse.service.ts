@@ -1,6 +1,6 @@
 import type { FastifyReply } from 'fastify';
-import { serializeMongo } from '../serializers';
-import type { Notification, SSEConnection, SSEMessage } from '../types';
+import { serializeMongo } from '../../serializers';
+import type { Notification, SSEConnection, SSEMessage } from '../../types';
 
 class SSEConnectionManager {
 	private connections: Map<string, Set<SSEConnection>> = new Map();
