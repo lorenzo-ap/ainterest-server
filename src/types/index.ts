@@ -3,6 +3,7 @@ export * from './common';
 export * from './email';
 export * from './http';
 export * from './notification';
+export * from './passkey';
 export * from './post';
 export * from './sse';
 export * from './user';
