@@ -1,4 +1,5 @@
 export * from './auth';
+export * from './comment';
 export * from './common';
 export * from './email';
 export * from './http';

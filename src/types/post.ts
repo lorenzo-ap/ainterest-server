@@ -13,6 +13,8 @@ export interface Post {
 	prompt: string;
 	photo: string;
 	likes: string[];
+	likesCount: number;
+	commentsCount: number;
 	createdAt: Date;
 	updatedAt: Date;
 }

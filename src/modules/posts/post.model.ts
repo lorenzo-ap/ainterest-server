@@ -24,8 +24,21 @@ const postSchema = new Schema(
 		]
 	},
 	{
-		timestamps: true
+		timestamps: true,
+		toJSON: { virtuals: true },
+		toObject: { virtuals: true }
 	}
 );
+
+postSchema.virtual('likesCount').get(function (this: Post) {
+	return this.likes ? this.likes.length : 0;
+});
+
+postSchema.virtual('commentsCount', {
+	ref: 'Comment',
+	localField: '_id',
+	foreignField: 'post',
+	count: true
+});
 
 export const PostModel = model<Post>('Post', postSchema);

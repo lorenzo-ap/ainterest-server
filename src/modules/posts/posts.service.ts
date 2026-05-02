@@ -10,12 +10,12 @@ import type { CreatePostBody } from './posts.types';
 const POST_USER_PROJECTION = 'username email photo';
 
 export const listPosts = async (viewerId?: string) => {
-	const posts = await PostModel.find({}).populate('user', POST_USER_PROJECTION);
+	const posts = await PostModel.find({}).populate('user', POST_USER_PROJECTION).populate('commentsCount');
 	return posts.map((post) => toPostResponse(post, viewerId));
 };
 
 export const listUserPosts = async (userId: IdParam['Params']['id'], viewerId?: string) => {
-	const posts = await PostModel.find({ user: userId }).populate('user', POST_USER_PROJECTION);
+	const posts = await PostModel.find({ user: userId }).populate('user', POST_USER_PROJECTION).populate('commentsCount');
 	return posts.map((post) => toPostResponse(post, viewerId));
 };
 
@@ -27,7 +27,7 @@ export const createUserPost = async (userId: string, body: CreatePostBody) => {
 		photo: cloudinaryPhoto.secure_url
 	});
 
-	await newPost.populate('user', POST_USER_PROJECTION);
+	await newPost.populate([{ path: 'user', select: POST_USER_PROJECTION }, { path: 'commentsCount' }]);
 
 	return toPostResponse(newPost, userId);
 };
@@ -87,7 +87,7 @@ export const togglePostLike = async (postId: string, currentUserId: string) => {
 	}
 
 	await post.save();
-	await post.populate('user', POST_USER_PROJECTION);
+	await post.populate([{ path: 'user', select: POST_USER_PROJECTION }, { path: 'commentsCount' }]);
 
 	return { status: 200, body: toPostResponse(post, currentUserId) };
 };

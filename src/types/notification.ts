@@ -1,5 +1,6 @@
 export enum NotificationType {
-	LIKE = 'LIKE'
+	LIKE = 'LIKE',
+	COMMENT = 'COMMENT'
 }
 
 export interface Notification {
